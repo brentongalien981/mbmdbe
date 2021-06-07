@@ -119,7 +119,22 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', 'predis'),
+
+        'primary' => [
+            'host' => env('REDIS_PRIMARY'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => 0,
+        ],
+        
+        'reader' => [
+            'host' => env('REDIS_READER'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => 0,
+        ],
+
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),

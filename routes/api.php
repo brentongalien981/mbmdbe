@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,25 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+
+
+/** roles */
+Route::get('/roles/getRoles', [RoleController::class, 'getRoles']);
+
+
+
+/* test */
+// BMD-FOR-DEBUG
+// fruitcake/laravel-cors middleware setup.
+// BMD-ON-STAGING: Comment-out.
+// BMD-TAGS: test, testing, debug, tinker, cors, http, https, auth
+Route::get('/test', function (Request $request) {
+    return [
+        'isResultOk' => true,
+        'url' => '/test',
+        'comment' => 'random shit bruh'
+    ];
+});
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
