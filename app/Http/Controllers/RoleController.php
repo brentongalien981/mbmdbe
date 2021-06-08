@@ -2,24 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\BmdCacheObjects\RoleModelCollectionCacheObject;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
     public function getRoles(Request $r) {
 
-        // BMD-ISH
-        // Set cache config.
+        $rolesCO = RoleModelCollectionCacheObject::getUpdatedModelCollection();
 
-
-        // Return roles.
 
         return [
             'objs' => [
-                'roles' => [
-                    ['id' => 1, 'name' => 'rolename1'],
-                    ['id' => 2, 'name' => 'rolename2']
-                ]
+                'roles' => $rolesCO->data
             ]
         ];
     }
