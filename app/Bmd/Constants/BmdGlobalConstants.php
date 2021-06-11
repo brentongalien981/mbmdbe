@@ -42,4 +42,13 @@ class BmdGlobalConstants
     // BMD-TAGS: email, order, queue, order-received
     // BMD-ON-STAGING
     public const QUEUE_FOR_EMAILING_ORDER_DETAILS = 'TestBmd-QEmailUserOrderDetails';
+
+
+
+    // BMD-TAGS: email, order, queue, order-received
+    // BMD-ON-STAGING
+    public const MBMD_ACCEPTED_EMAIL_DOMAINS = [
+        'asbdev.com',
+        'bmd.com'
+    ];
 }
