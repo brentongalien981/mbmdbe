@@ -77,6 +77,10 @@ class UserController extends Controller
             $overallProcessLogs[] = 'saved bmd-auth to cache';
 
 
+            //
+            $user->roles()->sync($v['selectedRoleIds']);
+
+
             DB::commit();
             $overallProcessLogs[] = 'commited db-transaction';
 
