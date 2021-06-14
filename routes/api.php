@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 
 
 /** users */
-Route::post('/users/create', [UserController::class, 'create']);
+Route::post('/users/create', [UserController::class, 'create'])->middleware('bmdauth');
 
 
 
