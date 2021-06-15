@@ -9,9 +9,11 @@ use App\Rules\MBMDRoleIds;
 use Illuminate\Http\Request;
 use App\Models\AuthProviderType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Bmd\Constants\BmdGlobalConstants;
+use App\Http\BmdHelpers\BmdAuthProvider;
 use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
@@ -39,6 +41,11 @@ class UserController extends Controller
             'password' => $passwordValidationRule,
             'selectedRoleIds' => ['required', new MBMDRoleIds]
         ]);
+
+
+
+        // Authorize
+        Gate::forUser(BmdAuthProvider::user())->authorize('create', User::class);
 
 
 
