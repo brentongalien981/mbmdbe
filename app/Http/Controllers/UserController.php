@@ -44,7 +44,7 @@ class UserController extends Controller
 
 
 
-        // Authorize
+        // Authorize.
         Gate::forUser(BmdAuthProvider::user())->authorize('create', User::class);
 
 
