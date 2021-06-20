@@ -38,10 +38,7 @@ class SaySomething extends Command
      */
     public function handle()
     {
-        $newRole = new Role();
-        $newRole->name = 'TestRole2';
-        $newRole->save();
 
-        return 1;
+        return 0;
     }
 }
