@@ -57,6 +57,8 @@ class PrepareBmdPurchasesCommand extends Command
 
         Purchase::prepareBmdPurchases($ordersStartDateInStr, $ordersEndDateInStr);
 
+        Purchase::updateTodaysPurchasesStatus();
+
         return 0;
     }
 

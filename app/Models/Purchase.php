@@ -28,6 +28,51 @@ class Purchase extends Model
 
 
 
+    public static function updateTodaysPurchasesStatus() {
+        $todaysPurchases = self::getTodaysPurchases();
+
+        foreach ($todaysPurchases as $p) {
+            $p->updatePurchaseStatus();
+        }
+    }
+
+
+
+    public function updatePurchaseStatus() {
+
+        $purchaseItems = $this->purchaseItems;
+        $numOfPurchaseItems = count($purchaseItems);
+        $numOfPurchaseItemsWithToBePurchasedStatus = 0;
+
+
+        foreach ($purchaseItems as $pi) {
+            $toBePurchasedStatus = PurchaseItemStatus::where('name', PurchaseItemStatus::NAME_FOR_STATUS_TO_BE_PURCHASED)->get()[0];
+            if ($pi->status_code == $toBePurchasedStatus->code) {
+                ++$numOfPurchaseItemsWithToBePurchasedStatus;
+            }
+        }
+
+
+        if ($numOfPurchaseItemsWithToBePurchasedStatus == $numOfPurchaseItems) {
+            $this->status_code = PurchaseStatus::where('name', PurchaseStatus::NAME_FOR_STATUS_TO_BE_PURCHASED)->get()[0]->code;
+        } else if ($numOfPurchaseItemsWithToBePurchasedStatus == 0) {
+            $this->status_code = PurchaseStatus::where('name', PurchaseStatus::NAME_FOR_STATUS_DEFAULT)->get()[0]->code;
+        } else {
+            $this->status_code = PurchaseStatus::where('name', PurchaseStatus::NAME_FOR_STATUS_EVALUATED_INCOMPLETELY_FOR_PURCHASE)->get()[0]->code;
+        }
+
+        $this->save();
+    }
+
+
+
+    public function purchaseItems()
+    {
+        return $this->hasMany(PurchaseItem::class);
+    }
+
+
+
     public static function prepareBmdPurchases($ordersStartDateInStr, $ordersEndDateInStr)
     {
 
