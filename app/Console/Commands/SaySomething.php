@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Role;
+use Exception;
 use Illuminate\Console\Command;
 
 class SaySomething extends Command
@@ -38,7 +39,6 @@ class SaySomething extends Command
      */
     public function handle()
     {
-
         return 0;
     }
 }
