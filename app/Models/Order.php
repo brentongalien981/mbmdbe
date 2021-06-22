@@ -14,13 +14,13 @@ class Order extends Model
         $yesterdaysOrders = self::getYesterdaysOrders();
 
         foreach ($yesterdaysOrders as $o) {
-            $o->updateStatus();
+            $o->updateStatusBasedOnOrderItemsStatuses();
         }
     }
 
 
 
-    public function updateStatus() {
+    public function updateStatusBasedOnOrderItemsStatuses() {
 
         $orderItems = $this->orderItems;
         $numOfOrderItems = count($orderItems);
@@ -36,11 +36,11 @@ class Order extends Model
 
 
         if ($numOfOrderItemsWithToBePurchasedStatus == $numOfOrderItems) {
-            $this->status_code = OrderStatus::where('name', OrderStatus::NAME_FOR_STATUS_TO_BE_PURCHASED)->get()[0]->code;
+            $this->status_code = OrderStatus::getCodeByName('TO_BE_PURCHASED');
         } else if ($numOfOrderItemsWithToBePurchasedStatus == 0) {
-            $this->status_code = OrderStatus::where('name', OrderStatus::NAME_FOR_STATUS_DEFAULT)->get()[0]->code;
+            $this->status_code = OrderStatus::getCodeByName('BEING_EVALUATED_FOR_PURCHASE');
         } else {
-            $this->status_code = OrderStatus::where('name', OrderStatus::NAME_FOR_STATUS_EVALUATED_INCOMPLETELY_FOR_PURCHASE)->get()[0]->code;
+            $this->status_code = OrderStatus::getCodeByName('EVALUATED_INCOMPLETELY_FOR_PURCHASE');
         }
 
         $this->save();

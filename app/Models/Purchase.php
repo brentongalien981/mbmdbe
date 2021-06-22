@@ -32,13 +32,13 @@ class Purchase extends Model
         $todaysPurchases = self::getTodaysPurchases();
 
         foreach ($todaysPurchases as $p) {
-            $p->updatePurchaseStatus();
+            $p->updatePurchaseStatusBasedOnPurchaseItemsStatuses();
         }
     }
 
 
 
-    public function updatePurchaseStatus() {
+    public function updatePurchaseStatusBasedOnPurchaseItemsStatuses() {
 
         $purchaseItems = $this->purchaseItems;
         $numOfPurchaseItems = count($purchaseItems);
