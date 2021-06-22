@@ -84,6 +84,20 @@ class Purchase extends Model
 
 
         foreach ($orders as $o) {
+
+
+            $statusCodeForOrderSummaryEmailSentToCustomer = OrderStatus::getCodeByName('ORDER_DETAILS_EMAILED_TO_USER');
+            $statusCodeForOrderBeingEvaluatedForPurchase = OrderStatus::getCodeByName('BEING_EVALUATED_FOR_PURCHASE');
+
+            // Skip orders that were paid, but not been emailed to customer with its order-summary.
+            if ($o->status_code != $statusCodeForOrderSummaryEmailSentToCustomer
+                || $o->status_code != $statusCodeForOrderBeingEvaluatedForPurchase) {
+                continue;
+            }
+
+            $o->status_code = $statusCodeForOrderBeingEvaluatedForPurchase;
+
+
             foreach ($o->orderItems as $oi) {
 
                 $oiDefaultStatus = OrderItemStatus::where('name', OrderItemStatus::NAME_FOR_STATUS_DEFAULT)->get()[0];
@@ -167,6 +181,9 @@ class Purchase extends Model
 
                 DB::commit();
             }
+
+
+            $o->status_code = OrderStatus::getCodeByName('TO_BE_PURCHASED');
         }
     }
 

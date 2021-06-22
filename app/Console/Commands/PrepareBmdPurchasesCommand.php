@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Order;
 use App\Models\Purchase;
 use Illuminate\Console\Command;
 
@@ -58,6 +59,8 @@ class PrepareBmdPurchasesCommand extends Command
         Purchase::prepareBmdPurchases($ordersStartDateInStr, $ordersEndDateInStr);
 
         Purchase::updateTodaysPurchasesStatus();
+
+        Order::updateYesterdaysOrdersStatus();
 
         return 0;
     }
