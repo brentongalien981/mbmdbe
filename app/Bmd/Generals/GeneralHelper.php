@@ -15,4 +15,29 @@ class GeneralHelper
         }
         return false;
     }
+
+
+    
+    public static function extractErrorTrace($error, $numOfErrorLines = 3) {
+
+        $returnedErrorStr = 'BMD Exception: ' . $error->getMessage();
+        $returnedErrorStr .= 'BMD Error Trace: ...';
+
+        $eTrace = $error->getTrace();
+        
+        for ($i = 0; $i < $numOfErrorLines; $i++) {
+            if (!isset($eTrace[$i])) {
+                break;
+            }
+            $eTraceLineMsg = 'CLASS ==> ' . $eTrace[$i]['class'] . ' | ';
+            $eTraceLineMsg .= 'FILE ==> ' . $eTrace[$i]['file'] . ' | ';
+            $eTraceLineMsg .= 'FUNC ==> ' . $eTrace[$i]['function'] . ' | ';
+            $eTraceLineMsg .= 'LINE ==> ' . $eTrace[$i]['line'];
+
+            $returnedErrorStr .= $eTraceLineMsg;
+        }
+
+        return $returnedErrorStr;
+
+    }
 }

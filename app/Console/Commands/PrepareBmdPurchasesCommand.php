@@ -2,8 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Bmd\Generals\GeneralHelper;
 use App\Models\Order;
 use App\Models\Purchase;
+use App\Models\ScheduledTaskLog;
+use Exception;
 use Illuminate\Console\Command;
 
 class PrepareBmdPurchasesCommand extends Command
@@ -44,6 +47,10 @@ class PrepareBmdPurchasesCommand extends Command
      */
     public function handle()
     {
+        $executionStartTimeInSec = microtime(true);
+        $resultMsg = '';
+        $isResultOk = 0;
+
 
         $numOfSecInDay = 86400;
         $dateObjToday = getdate();
@@ -56,11 +63,36 @@ class PrepareBmdPurchasesCommand extends Command
         $ordersEndDateInStr = $endDataObj['year'] . '-' . $endDataObj['mon'] . '-' . $endDataObj['mday'];
 
 
-        Purchase::prepareBmdPurchases($ordersStartDateInStr, $ordersEndDateInStr);
+        try {
+            Purchase::prepareBmdPurchases($ordersStartDateInStr, $ordersEndDateInStr);
+            $resultMsg .= 'Executed Purchase::prepareBmdPurchases().\n';
 
-        Purchase::updateTodaysPurchasesStatus();
+            Purchase::updateTodaysPurchasesStatus();
+            $resultMsg .= 'Executed Purchase::updateTodaysPurchasesStatus().\n';
+    
+            Order::updateYesterdaysOrdersStatus();
+            $resultMsg .= 'Executed Order::updateYesterdaysOrdersStatus().\n';
 
-        Order::updateYesterdaysOrdersStatus();
+            $isResultOk = 1;
+
+        } catch (Exception $e) {
+            $numOfErrorLines = 4;
+            $eLogStr = GeneralHelper::extractErrorTrace($e, $numOfErrorLines);
+
+            $resultMsg .= $eLogStr . '\n';
+        }
+
+
+        $executionEndTimeInSec = microtime(true);
+        $executionPeriod = $executionEndTimeInSec - $executionStartTimeInSec;
+
+        $scheduleTaskLog = new ScheduledTaskLog();
+        $scheduleTaskLog->command_signature = $this->signature;
+        $scheduleTaskLog->execution_period = $executionPeriod;
+        $scheduleTaskLog->is_successful = $isResultOk;
+        $scheduleTaskLog->entire_process_logs = $this->resultMsg;
+        $scheduleTaskLog->save();
+
 
         return 0;
     }
