@@ -10,7 +10,46 @@ class Order extends Model
     use HasFactory;
 
 
-    public static function updateYesterdaysOrdersStatus() {
+
+    /**
+     * Indicates if the model's ID is auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+
+
+    public static function getYesterdaysOrders()
+    {
+
+        $numOfSecInDay = 86400;
+        $dateObjToday = getdate();
+        $dateObjYesterday = getdate($dateObjToday[0] - $numOfSecInDay);
+
+        $startDateInStr = $dateObjYesterday['year'] . '-' . $dateObjYesterday['mon'] . '-' . $dateObjYesterday['mday'];
+        $endDateInStr = $startDateInStr;
+
+
+        return self::getOrdersByInclusivePeriod($startDateInStr, $endDateInStr);
+    }
+
+
+
+    public static function getOrdersByInclusivePeriod($from, $to)
+    {
+        $to .= ' 23:59:59';
+
+        $orders = self::where('created_at', '>=', $from)
+            ->where('created_at', '<=', $to)
+            ->get();
+
+        return $orders;
+    }
+
+
+    public static function updateYesterdaysOrdersStatus()
+    {
         $yesterdaysOrders = self::getYesterdaysOrders();
 
         foreach ($yesterdaysOrders as $o) {
@@ -20,7 +59,8 @@ class Order extends Model
 
 
 
-    public function updateStatusBasedOnOrderItemsStatuses() {
+    public function updateStatusBasedOnOrderItemsStatuses()
+    {
 
         $orderItems = $this->orderItems;
         $numOfOrderItems = count($orderItems);

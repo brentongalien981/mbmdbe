@@ -47,10 +47,10 @@ class PrepareBmdPurchasesCommand extends Command
 
         $numOfSecInDay = 86400;
         $dateObjToday = getdate();
-        // $dateObjYesterday = getdate($dateObjToday[0] - $numOfSecInDay);
+        $dateObjYesterday = getdate($dateObjToday[0] - $numOfSecInDay);
 
-        $startDateObj = getdate($dateObjToday[0]);
-        $endDataObj = getdate($dateObjToday[0]);
+        $startDateObj = getdate($dateObjYesterday[0]);
+        $endDataObj = getdate($dateObjYesterday[0]);
 
         $ordersStartDateInStr = $startDateObj['year'] . '-' . $startDateObj['mon'] . '-' . $startDateObj['mday'];
         $ordersEndDateInStr = $endDataObj['year'] . '-' . $endDataObj['mon'] . '-' . $endDataObj['mday'];
