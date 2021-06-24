@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ScheduledTaskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,11 @@ Route::post('/users/create', [UserController::class, 'create'])->middleware('bmd
 
 /** roles */
 Route::get('/roles/getRoles', [RoleController::class, 'getRoles']);
+
+
+
+/** automated-jobs, scheduled-task */
+Route::get('/automated-jobs', [ScheduledTaskController::class, 'index'])->middleware('bmdauth');
 
 
 
