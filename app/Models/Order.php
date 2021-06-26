@@ -48,6 +48,18 @@ class Order extends Model
     }
 
 
+
+    public static function updateOrdersStatusesWithDatePeriod($from, $to)
+    {
+        $orders = self::getOrdersByInclusivePeriod($from, $to);
+
+        foreach ($orders as $o) {
+            $o->updateStatusBasedOnOrderItemsStatuses();
+        }
+    }
+
+
+
     public static function updateYesterdaysOrdersStatus()
     {
         $yesterdaysOrders = self::getYesterdaysOrders();

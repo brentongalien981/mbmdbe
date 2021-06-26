@@ -39,9 +39,10 @@ class BmdGlobalConstants
 
 
 
-    // BMD-TAGS: email, order, queue, order-received
+    // BMD-TAGS: email, order, queue, order-received, commands, scheduled-tasks, jobs, purchase, inventory
     // BMD-ON-STAGING
     public const QUEUE_FOR_EMAILING_ORDER_DETAILS = 'TestBmd-QEmailUserOrderDetails';
+    public const QUEUE_FOR_HANDLING_MANUAL_SCHEDULED_TASK_DISPATCHES = 'MBMDBE-ManualScheduledTaskDispatchQ';
 
 
 

@@ -2,13 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Illuminate\Http\Request;
 use App\Models\ScheduledTask;
 use App\Models\ScheduledTaskLog;
 use App\Models\ScheduledTaskStatus;
-use Illuminate\Http\Request;
+use App\Events\PrepareBmdPurchasesCommandEvent;
 
 class ScheduledTaskController extends Controller
 {
+    public const RESULT_CODE_COMMAND_UNAVAILABLE = -1;
+    public const RESULT_CODE_COMMAND_DOES_NOT_EXIST = -2;
+
+    public const RESULT_CODE_COMMAND_EXECUTED = 1;
+
+
     public function index(Request $r)
     {
 
@@ -17,7 +25,7 @@ class ScheduledTaskController extends Controller
             $j->status = ScheduledTaskStatus::where('code', $j->status_code)->get()[0];
             $j->last_log = ScheduledTaskLog::where('scheduled_task_id', $j->id)->orderBy('created_at', 'desc')->get()[0] ?? null;
         }
-        
+
         return [
             'isResultOk' => true,
             'objs' => [
@@ -28,13 +36,47 @@ class ScheduledTaskController extends Controller
 
 
 
-    public function execute(Request $r) {
-        
+    public function execute(Request $r)
+    {
+        $overallProcessLogs = [];
+        $isResultOk = false;
+        $resultCode = 0;
+
+        $scheduledTask = ScheduledTask::find($r->jobId)->get()[0];
+        $availableStatus = ScheduledTaskStatus::where('name', 'AVAILABLE')->get()[0];
+
+
+        if ($scheduledTask->status_code == $availableStatus->code) {
+            switch ($r->jobId) {
+                case ScheduledTask::where('command_signature', 'BmdPurchases:Prepare')->get()[0]->id:
+                    $commandData = [
+                        'jobId' => $r->jobId,
+                        'dateFrom' => $r->dateFrom,
+                        'dateTo' => $r->dateTo
+                    ];
+
+                    PrepareBmdPurchasesCommandEvent::dispatch($commandData);
+                    $isResultOk = true;
+                    $resultCode = self::RESULT_CODE_COMMAND_EXECUTED;
+                    break;
+
+                default:
+                    $resultCode = self::RESULT_CODE_COMMAND_DOES_NOT_EXIST;
+                    break;
+            }
+            
+        } else {
+            $resultCode = self::RESULT_CODE_COMMAND_UNAVAILABLE;
+        }
+
+
+
         return [
-            'msg' => 'In METHOD: execute()',
-            'r->jobId' => $r->jobId,
-            'r->dateFrom' => $r->dateFrom,
-            'r->dateTo' => $r->dateTo
+            'isResultOk' => $isResultOk,
+            'resultCode' => $resultCode,
+            'objs' => [
+                'overallProcessLogs' => $overallProcessLogs,
+            ]
         ];
     }
 }

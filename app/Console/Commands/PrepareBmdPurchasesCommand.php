@@ -51,7 +51,7 @@ class PrepareBmdPurchasesCommand extends Command
     {
 
         $executionStartTimeInSec = microtime(true);
-        $resultMsg = '';
+        $resultMsg = 'Automated command execution in CLASS: PrepareBmdPurchasesCommand.\n';
         $isResultOk = false;
 
 
@@ -81,13 +81,13 @@ class PrepareBmdPurchasesCommand extends Command
 
         try {
             Purchase::prepareBmdPurchases($ordersStartDateInStr, $ordersEndDateInStr);
-            $resultMsg .= 'Executed Purchase::prepareBmdPurchases().\n';
+            $resultMsg .= 'Executed METHOD: Purchase::prepareBmdPurchases().\n';
 
             Purchase::updateTodaysPurchasesStatus();
-            $resultMsg .= 'Executed Purchase::updateTodaysPurchasesStatus().\n';
+            $resultMsg .= 'Executed METHOD: Purchase::updateTodaysPurchasesStatus().\n';
     
             Order::updateYesterdaysOrdersStatus();
-            $resultMsg .= 'Executed Order::updateYesterdaysOrdersStatus().\n';
+            $resultMsg .= 'Executed METHOD: Order::updateYesterdaysOrdersStatus().\n';
 
             $isResultOk = true;
 
@@ -107,7 +107,7 @@ class PrepareBmdPurchasesCommand extends Command
         $scheduleTaskLog->execution_period = $executionPeriod;
         $scheduleTaskLog->status_code = $isResultOk ? ScheduledTaskStatus::where('name', 'PROCESS_SUCCEEDED')->get()[0]->code : ScheduledTaskStatus::where('name', 'PROCESS_FAILED')->get()[0]->code;
         $scheduleTaskLog->is_successful = $isResultOk ? 1 : 0;
-        $scheduleTaskLog->entire_process_logs = $this->resultMsg;
+        $scheduleTaskLog->entire_process_logs = $resultMsg;
         $scheduleTaskLog->save();
 
         
