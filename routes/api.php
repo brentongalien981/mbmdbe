@@ -1,11 +1,12 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\ScheduledTaskController;
-use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ScheduledTaskController;
+use App\Http\Controllers\ScheduledTaskLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,6 +40,11 @@ Route::get('/roles/getRoles', [RoleController::class, 'getRoles']);
 Route::get('/automated-jobs', [ScheduledTaskController::class, 'index'])->middleware('bmdauth');
 Route::post('/automated-jobs/execute', [ScheduledTaskController::class, 'execute'])->middleware('bmdauth');
 Route::post('/automated-jobs/resetJobStatus', [ScheduledTaskController::class, 'resetJobStatus'])->middleware('bmdauth');
+
+
+
+/** automated-job-logs, scheduled-task-logs */
+Route::get('/automated-job-logs/read', [ScheduledTaskLogController::class, 'read'])->middleware('bmdauth');
 
 
 
