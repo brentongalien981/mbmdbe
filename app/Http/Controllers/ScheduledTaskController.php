@@ -17,6 +17,24 @@ class ScheduledTaskController extends Controller
     public const RESULT_CODE_COMMAND_EXECUTED = 1;
 
 
+
+    public function resetJobStatus(Request $r)
+    {
+        $aj = ScheduledTask::find($r->jobId);
+        $aj->status_code = ScheduledTaskStatus::where('name', 'AVAILABLE')->get()[0]->code;
+        $aj->save();
+
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'jobId' => $r->jobId
+            ]
+        ];
+    }
+
+
+
     public function index(Request $r)
     {
 

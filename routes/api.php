@@ -38,6 +38,7 @@ Route::get('/roles/getRoles', [RoleController::class, 'getRoles']);
 /** automated-jobs, scheduled-task */
 Route::get('/automated-jobs', [ScheduledTaskController::class, 'index'])->middleware('bmdauth');
 Route::post('/automated-jobs/execute', [ScheduledTaskController::class, 'execute'])->middleware('bmdauth');
+Route::post('/automated-jobs/resetJobStatus', [ScheduledTaskController::class, 'resetJobStatus'])->middleware('bmdauth');
 
 
 
