@@ -75,7 +75,7 @@ class ScheduledTaskController extends Controller
             'isResultOk' => $isResultOk,
             'resultCode' => $resultCode,
             'objs' => [
-                'overallProcessLogs' => $overallProcessLogs,
+                'overallProcessLogs' => $overallProcessLogs, // BMD-ON-STAGING
             ]
         ];
     }
