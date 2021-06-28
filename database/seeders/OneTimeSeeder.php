@@ -15,10 +15,7 @@ class OneTimeSeeder extends Seeder
     {
 
         $this->call([
-            OrderItemStatusSeeder::class,
-            PurchaseStatusSeeder::class,
-            PurchaseItemStatusSeeder::class,
-            InventoryItemStatusSeeder::class
+            //
         ]);
     }
 }

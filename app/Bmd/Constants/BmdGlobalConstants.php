@@ -7,6 +7,7 @@ class BmdGlobalConstants
 {
     // BMD-ON-STAGING
     // public const WEBSITE = 'https://mbmd.com';
+    public const BMD_SELLER_NAME = 'ASB Inc.';
 
 
     public const RETRIEVED_DATA_FROM_DB = 1001;
