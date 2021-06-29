@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\ScheduledTask;
 use App\Models\ScheduledTaskLog;
 use App\Models\ScheduledTaskStatus;
+use Illuminate\Support\Facades\Gate;
+use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Events\PrepareBmdPurchasesCommandEvent;
 use App\Events\SyncBmdSellerProductsWithInventoryEvent;
 
@@ -21,6 +23,9 @@ class ScheduledTaskController extends Controller
 
     public function resetJobStatus(Request $r)
     {
+        Gate::forUser(BmdAuthProvider::user())->authorize('generalProcess', ScheduledTask::class);
+
+
         $aj = ScheduledTask::find($r->jobId);
         $aj->status_code = ScheduledTaskStatus::where('name', 'AVAILABLE')->get()[0]->code;
         $aj->save();
@@ -38,6 +43,10 @@ class ScheduledTaskController extends Controller
 
     public function index(Request $r)
     {
+
+        // Authorize.
+        Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', ScheduledTask::class);
+
 
         $aj = ScheduledTask::all();
         foreach ($aj as $j) {
@@ -57,6 +66,9 @@ class ScheduledTaskController extends Controller
 
     public function execute(Request $r)
     {
+        Gate::forUser(BmdAuthProvider::user())->authorize('execute', ScheduledTask::class);
+
+
         $overallProcessLogs = [];
         $isResultOk = false;
         $resultCode = 0;
