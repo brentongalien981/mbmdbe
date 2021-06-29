@@ -8,6 +8,7 @@ use App\Models\ScheduledTask;
 use App\Models\ScheduledTaskLog;
 use App\Models\ScheduledTaskStatus;
 use App\Events\PrepareBmdPurchasesCommandEvent;
+use App\Events\SyncBmdSellerProductsWithInventoryEvent;
 
 class ScheduledTaskController extends Controller
 {
@@ -63,16 +64,22 @@ class ScheduledTaskController extends Controller
         $scheduledTask = ScheduledTask::find($r->jobId)->get()[0];
         $availableStatus = ScheduledTaskStatus::where('name', 'AVAILABLE')->get()[0];
 
+        $commandData = [
+            'jobId' => $r->jobId,
+            'dateFrom' => $r->dateFrom,
+            'dateTo' => $r->dateTo
+        ];
+
 
         if ($scheduledTask->status_code == $availableStatus->code) {
             switch ($r->jobId) {
-                case ScheduledTask::where('command_signature', 'BmdPurchases:Prepare')->get()[0]->id:
-                    $commandData = [
-                        'jobId' => $r->jobId,
-                        'dateFrom' => $r->dateFrom,
-                        'dateTo' => $r->dateTo
-                    ];
+                case ScheduledTask::where('command_signature', 'SyncBmdSellerProductsWithInventory:Execute')->get()[0]->id:
+                    SyncBmdSellerProductsWithInventoryEvent::dispatch($commandData);
+                    $isResultOk = true;
+                    $resultCode = self::RESULT_CODE_COMMAND_EXECUTED;
+                    break;
 
+                case ScheduledTask::where('command_signature', 'BmdPurchases:Prepare')->get()[0]->id:
                     PrepareBmdPurchasesCommandEvent::dispatch($commandData);
                     $isResultOk = true;
                     $resultCode = self::RESULT_CODE_COMMAND_EXECUTED;
@@ -82,7 +89,6 @@ class ScheduledTaskController extends Controller
                     $resultCode = self::RESULT_CODE_COMMAND_DOES_NOT_EXIST;
                     break;
             }
-            
         } else {
             $resultCode = self::RESULT_CODE_COMMAND_UNAVAILABLE;
         }

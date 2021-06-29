@@ -2,24 +2,21 @@
 
 namespace App\Listeners;
 
-use App\Bmd\Constants\BmdGlobalConstants;
 use Exception;
 use App\Models\Role;
-use App\Models\Order;
-use App\Models\Purchase;
+use App\Models\ProductSeller;
 use App\Models\ScheduledTask;
 use App\Models\ScheduledTaskLog;
 use App\Bmd\Generals\GeneralHelper;
 use App\Models\ScheduledTaskStatus;
-use App\Events\PrepareBmdPurchasesCommandEvent;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
+use App\Bmd\Constants\BmdGlobalConstants;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Events\SyncBmdSellerProductsWithInventoryEvent;
 
-class HandlePrepareBmdPurchasesCommandEvent implements ShouldQueue
+class HandleSyncBmdSellerProductsWithInventoryEvent implements ShouldQueue
 {
     public $queue = BmdGlobalConstants::QUEUE_FOR_HANDLING_MANUAL_SCHEDULED_TASK_DISPATCHES;
-
-
 
     /**
      * Create the event listener.
@@ -34,39 +31,32 @@ class HandlePrepareBmdPurchasesCommandEvent implements ShouldQueue
     /**
      * Handle the event.
      *
-     * @param  PrepareBmdPurchasesCommandEvent  $event
+     * @param  object  $event
      * @return void
      */
-    public function handle(PrepareBmdPurchasesCommandEvent $event)
+    public function handle(SyncBmdSellerProductsWithInventoryEvent $event)
     {
-        
-        $d = $event->commandData;
         $executionStartTimeInSec = microtime(true);
-        $resultMsg = 'Manually executing command in CLASS: HandlePrepareBmdPurchasesCommandEvent.\n';
+        $resultMsg = 'Manually executing command in CLASS: HandleSyncBmdSellerProductsWithInventoryEvent.\n';
         $isResultOk = false;
 
-
+        $d = $event->commandData;
         $scheduledTask = ScheduledTask::find($d['jobId']);
         $scheduledTask->status_code = ScheduledTaskStatus::where('name', 'PROCESSING')->get()[0]->code;
         $scheduledTask->save();
 
-        
 
         try {
-            Purchase::prepareBmdPurchases($d['dateFrom'], $d['dateTo']);
-            $resultMsg .= 'Executed METHOD: Purchase::prepareBmdPurchases().\n';
 
-            Purchase::updateTodaysPurchasesStatus();
-            $resultMsg .= 'Executed METHOD: Purchase::updateTodaysPurchasesStatus().\n';
-
-            Order::updateOrdersStatusesWithDatePeriod($d['dateFrom'], $d['dateTo']);
-            $resultMsg .= 'Executed METHOD: Order::updateOrdersStatusesWithDatePeriod(' . $d['dateFrom'] . ', ' . $d['dateTo'] . ').\n';
+            ProductSeller::syncBmdSellerProductsSizeAvailabilityQuantitiesWithInventory();
+            $resultMsg .= 'Executed METHOD: ProductSeller::syncBmdSellerProductsSizeAvailabilityQuantitiesWithInventory().\n';
 
             $isResultOk = true;
         } catch (Exception $e) {
             $eLogStr = GeneralHelper::extractErrorTrace($e);
             $resultMsg .= $eLogStr . '\n';
         }
+
 
 
         $executionEndTimeInSec = microtime(true);
