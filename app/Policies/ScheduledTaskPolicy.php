@@ -34,14 +34,18 @@ class ScheduledTaskPolicy
     public function generalProcess(User $user)
     {
         $orderManagerRole = Role::where('name', 'OrderManager')->get()[0];
+        $inventoryManagerRole = Role::where('name', 'InventoryManager')->get()[0];
+
+        $userRoleIds = [];
 
         foreach ($user->roles as $r) {
-            if ($orderManagerRole->id == $r->id) {
-                return true;
-            }
+            $userRoleIds[] = $r->id;
         }
 
-        return false;
+        if (!in_array($orderManagerRole->id, $userRoleIds)) { return false; }
+        if (!in_array($inventoryManagerRole->id, $userRoleIds)) { return false; }
+
+        return true;
     }
 
     /**
