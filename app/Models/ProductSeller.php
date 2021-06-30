@@ -33,6 +33,21 @@ class ProductSeller extends Model
 
 
 
+    public static function resetSizeAvailabilityQuantitiesOfNonBmdSellerProducts() {
+        $bmdSeller = Seller::where('name', BmdGlobalConstants::BMD_SELLER_NAME)->get()[0];
+
+        $allNonBmdSellerProducts = self::whereNotIn('seller_id', [$bmdSeller->id])->get();
+
+        foreach ($allNonBmdSellerProducts as $sp) {
+            foreach ($sp->sizeAvailabilities as $sa) {
+                $sa->quantity = $sa->daily_reset_quantity;
+                $sa->save();
+            }
+        }
+    }
+
+
+
     public function sizeAvailabilities()
     {
         return $this->hasMany(SizeAvailability::class, 'seller_product_id', 'id');

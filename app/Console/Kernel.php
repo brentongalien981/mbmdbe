@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\ChangeTestRoleDescriptionCommand;
 use App\Console\Commands\PrepareBmdPurchasesCommand;
+use App\Console\Commands\ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsCommand;
 use App\Console\Commands\SyncBmdSellerProductsWithInventoryCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -30,6 +31,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         // $schedule->command(ChangeTestRoleDescriptionCommand::class);
         $schedule->command(PrepareBmdPurchasesCommand::class)->dailyAt(PrepareBmdPurchasesCommand::scheduledDispatchTime);
+        $schedule->command(ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsCommand::class)->dailyAt(ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsCommand::scheduledDispatchTime);
         $schedule->command(SyncBmdSellerProductsWithInventoryCommand::class)->dailyAt(SyncBmdSellerProductsWithInventoryCommand::scheduledDispatchTime);
     }
 

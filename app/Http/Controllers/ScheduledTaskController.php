@@ -10,6 +10,7 @@ use App\Models\ScheduledTaskStatus;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Events\PrepareBmdPurchasesCommandEvent;
+use App\Events\ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent;
 use App\Events\SyncBmdSellerProductsWithInventoryEvent;
 
 class ScheduledTaskController extends Controller
@@ -82,27 +83,33 @@ class ScheduledTaskController extends Controller
             'dateTo' => $r->dateTo
         ];
 
+        $event = null;
+
 
         if ($scheduledTask->status_code == $availableStatus->code) {
             switch ($r->jobId) {
+                case ScheduledTask::where('command_signature', 'ResetSizeAvailabilityQuantitiesOfNonBmdSellerProducts:Execute')->get()[0]->id:
+                    $event = ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent::class;
+                    break;
                 case ScheduledTask::where('command_signature', 'SyncBmdSellerProductsWithInventory:Execute')->get()[0]->id:
-                    SyncBmdSellerProductsWithInventoryEvent::dispatch($commandData);
-                    $isResultOk = true;
-                    $resultCode = self::RESULT_CODE_COMMAND_EXECUTED;
+                    $event = SyncBmdSellerProductsWithInventoryEvent::class;
                     break;
-
                 case ScheduledTask::where('command_signature', 'BmdPurchases:Prepare')->get()[0]->id:
-                    PrepareBmdPurchasesCommandEvent::dispatch($commandData);
-                    $isResultOk = true;
-                    $resultCode = self::RESULT_CODE_COMMAND_EXECUTED;
+                    $event = PrepareBmdPurchasesCommandEvent::class;
                     break;
-
                 default:
                     $resultCode = self::RESULT_CODE_COMMAND_DOES_NOT_EXIST;
                     break;
             }
         } else {
             $resultCode = self::RESULT_CODE_COMMAND_UNAVAILABLE;
+        }
+
+
+        if ($event) {
+            $event::dispatch($commandData);
+            $isResultOk = true;
+            $resultCode = self::RESULT_CODE_COMMAND_EXECUTED;
         }
 
 
