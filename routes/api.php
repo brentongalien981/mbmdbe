@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DailySummaryController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ScheduledTaskController;
@@ -45,6 +46,11 @@ Route::post('/automated-jobs/resetJobStatus', [ScheduledTaskController::class, '
 
 /** automated-job-logs, scheduled-task-logs */
 Route::get('/automated-job-logs/read', [ScheduledTaskLogController::class, 'read'])->middleware('bmdauth');
+
+
+
+/** daily-summary */
+Route::get('/daily-summary/readDailySummaryData', [DailySummaryController::class, 'readDailySummaryData'])->middleware('bmdauth');
 
 
 
