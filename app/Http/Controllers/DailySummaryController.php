@@ -8,11 +8,17 @@ use App\Models\Purchase;
 use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use App\Models\IncompleteOrder;
+use Illuminate\Support\Facades\Gate;
+use App\Http\BmdHelpers\BmdAuthProvider;
 
 class DailySummaryController extends Controller
 {
     public function readDailySummaryData(Request $r)
     {
+        Gate::forUser(BmdAuthProvider::user())->authorize('view-dailySummary');
+
+
+        
         $endDate = $r->statsEndDate . ' 23:59:59';
 
         $orders = Order::where('created_at', '>=', $r->statsStartDate)
@@ -45,7 +51,6 @@ class DailySummaryController extends Controller
             $expenses += $p->charged_subtotal + $p->charged_shipping_fee + $p->charged_tax + $p->charged_other_fee;
         }
 
-        $expenses += 2.35;
 
 
         return [
