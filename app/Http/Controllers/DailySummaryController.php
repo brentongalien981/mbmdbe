@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\IncompleteOrder;
-use App\Models\Order;
-use App\Models\OrderItem;
 use Exception;
+use App\Models\Order;
+use App\Models\Purchase;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use App\Models\IncompleteOrder;
 
 class DailySummaryController extends Controller
 {
@@ -14,9 +15,9 @@ class DailySummaryController extends Controller
     {
         $endDate = $r->statsEndDate . ' 23:59:59';
 
-        $numOfOrders = Order::where('created_at', '>=', $r->statsStartDate)
+        $orders = Order::where('created_at', '>=', $r->statsStartDate)
             ->where('created_at', '<=', $endDate)
-            ->count();
+            ->get();
 
 
         $numOfOrderItems = OrderItem::where('created_at', '>=', $r->statsStartDate)
@@ -29,13 +30,32 @@ class DailySummaryController extends Controller
             ->count();
 
 
+        $revenue = 0.0;
+        foreach ($orders as $o) {
+            $revenue += $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
+        }
+
+
+        $purchases = Purchase::where('created_at', '>=', $r->statsStartDate)
+            ->where('created_at', '<=', $endDate)
+            ->get();
+
+        $expenses = 0.0;
+        foreach ($purchases as $p) {
+            $expenses += $p->charged_subtotal + $p->charged_shipping_fee + $p->charged_tax + $p->charged_other_fee;
+        }
+
+        $expenses += 2.35;
+
 
         return [
             'isResultOk' => true,
             'objs' => [
-                'numOfOrders' => $numOfOrders,
+                'numOfOrders' => $orders->count(),
                 'numOfOrderItems' => $numOfOrderItems,
-                'numOfIncompleteOrders' => $numOfIncompleteOrders
+                'numOfIncompleteOrders' => $numOfIncompleteOrders,
+                'revenue' => $revenue,
+                'expenses' => $expenses
             ]
         ];
     }
