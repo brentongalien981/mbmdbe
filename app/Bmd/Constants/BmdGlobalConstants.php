@@ -53,4 +53,10 @@ class BmdGlobalConstants
         'asbdev.com',
         'bmd.com'
     ];
+
+
+
+    // 
+    public const NUM_OF_SEC_IN_DAY = 24 * 60 * 60;
+    public const MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK = 5000;
 }

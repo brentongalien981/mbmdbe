@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\GenerateOPIsEvent;
 use App\Events\PrepareBmdPurchasesCommandEvent;
 use App\Events\ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent;
 use App\Events\SyncBmdSellerProductsWithInventoryEvent;
+use App\Listeners\HandleGenerateOPIsEvent;
 use App\Listeners\HandlePrepareBmdPurchasesCommandEvent;
 use App\Listeners\HandleResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent;
 use App\Listeners\HandleSyncBmdSellerProductsWithInventoryEvent;
@@ -21,7 +23,8 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         PrepareBmdPurchasesCommandEvent::class => [HandlePrepareBmdPurchasesCommandEvent::class],
         SyncBmdSellerProductsWithInventoryEvent::class => [HandleSyncBmdSellerProductsWithInventoryEvent::class],
-        ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent::class => [HandleResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent::class]
+        ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent::class => [HandleResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsEvent::class],
+        GenerateOPIsEvent::class => [HandleGenerateOPIsEvent::class]
     ];
 
     /**

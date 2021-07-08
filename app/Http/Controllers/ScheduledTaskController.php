@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\GenerateOPIsEvent;
 use Exception;
 use Illuminate\Http\Request;
 use App\Models\ScheduledTask;
@@ -96,6 +97,12 @@ class ScheduledTaskController extends Controller
                     break;
                 case ScheduledTask::where('command_signature', 'BmdPurchases:Prepare')->get()[0]->id:
                     $event = PrepareBmdPurchasesCommandEvent::class;
+                    break;
+                case ScheduledTask::where('command_signature', 'GenerateOPIs:Execute')->get()[0]->id:
+                    // BMD-TODO
+                    $commandData = GenerateOPIsEvent::extractCommandValidatedData($r);
+                    GenerateOPIsEvent::guardTooManyOrdersToBeCreated($commandData);
+                    $event = GenerateOPIsEvent::class;
                     break;
                 default:
                     $resultCode = self::RESULT_CODE_COMMAND_DOES_NOT_EXIST;
