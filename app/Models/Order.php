@@ -20,6 +20,10 @@ class Order extends Model
 
 
 
+    protected $guarded = [];
+
+
+
     public static function getYesterdaysOrders()
     {
 

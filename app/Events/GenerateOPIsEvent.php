@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Bmd\Constants\BmdExceptions;
 use App\Bmd\Constants\BmdGlobalConstants;
 use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -13,6 +14,19 @@ class GenerateOPIsEvent
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
+
+    public const TREND_PERIOD_OPTION_DAILY = 1;
+    public const TREND_PERIOD_OPTION_WEEKLY = 2;
+    public const TREND_PERIOD_OPTION_MONTHLY = 3;
+    public const TREND_PERIOD_OPTION_YEARLY = 4;
+
+    public const TREND_CHANGE_OPTION_INCREASING = 1;
+    public const TREND_CHANGE_OPTION_DECREASING = 2;
+    public const TREND_CHANGE_OPTION_AVERAGE = 3;
+    public const TREND_CHANGE_OPTION_INCREAS_AND_DECREASE = 4;
+
+
+    
     public $commandData;
 
     /**
@@ -36,7 +50,9 @@ class GenerateOPIsEvent
         $max = $commandData['maxBaseNumOfDailyOrders'];
 
         if (($periodDays * $max) > BmdGlobalConstants::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK) {
-            throw new Exception('MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK Reached!');
+            $exceptionMsg = 'BMD Exception: ' . BmdExceptions::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK['id'];
+            $exceptionMsg .= ' => ' . BmdExceptions::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK['name'];
+            throw new Exception($exceptionMsg);
         }
     }
 

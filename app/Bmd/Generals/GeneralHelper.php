@@ -40,4 +40,36 @@ class GeneralHelper
         return $returnedErrorStr;
 
     }
+
+
+
+    public static function getDateInStrWithData($startDateInStr, $numDaysToAdd = 0)
+    {
+        $startDateTimeStamp = strtotime($startDateInStr);
+        $numOfSecToAdd = $numDaysToAdd * BmdGlobalConstants::NUM_OF_SEC_IN_DAY;
+        $date = getdate($startDateTimeStamp + $numOfSecToAdd);
+
+        return $date['year'] . '-' . self::getMonthNumWithZeroPadding($date) . '-' .  self::getDayNumWithZeroPadding($date);
+    }
+
+
+
+    public static function getMonthNumWithZeroPadding($date)
+    {
+        $monthNum = $date['mon'];
+        if ($monthNum <= 9) {
+            return '0' . $monthNum;
+        }
+        return $monthNum;
+    }
+
+
+
+    public static function getDayNumWithZeroPadding($date)
+    {
+        if ($date['mday'] <= 9) {
+            return '0' . $date['mday'];
+        }
+        return $date['mday'];
+    }
 }
