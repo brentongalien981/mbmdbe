@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Bmd\Traits\Purchase\CanGenerateOPIsTrait;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +10,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Purchase extends Model
 {
     use HasFactory;
+    use CanGenerateOPIsTrait;
+    
 
 
     public static function getTodaysPurchases()

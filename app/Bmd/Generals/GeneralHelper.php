@@ -72,4 +72,21 @@ class GeneralHelper
         }
         return $date['mday'];
     }
+
+
+
+    /**
+     * Undocumented function
+     *
+     * @param string $start
+     * @param string $end
+     * @return int
+     */
+    public static function getNumDaysBetweenDates($start, $end) {
+
+        $ithDayOfTheYearForStartDate = getdate(strtotime($start))['yday'];
+        $ithDayOfTheYearForEndDate = getdate(strtotime($end))['yday'];
+
+        return $ithDayOfTheYearForEndDate - $ithDayOfTheYearForStartDate;
+    }
 }

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Bmd\Generals\GeneralHelper;
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Support\Str;
+use App\Bmd\Generals\GeneralHelper;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class OrderFactory extends Factory
@@ -38,10 +39,10 @@ class OrderFactory extends Factory
 
 
         return [
-            'id' => Str::uuid()->toString(),
+            'id' => 0, // Str::uuid()->toString(),
             'cart_id' => $cart->id,
             'stripe_payment_intent_id' => $cart->stripe_payment_intent_id,
-            'status_code' => 8015, // DELIVERED
+            'status_code' => 8300, // BEING_EVALUATED_FOR_PURCHASE
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),
 
@@ -68,14 +69,18 @@ class OrderFactory extends Factory
 
     public function configure()
     {
-        return $this->afterMaking(function (Order $o) {
-            // This is a workaround because doing the "inline-state-manipulation"
-            // doesn't create a default id (UUID) right away, giving an error when 
-            // saving to db. 
+        return $this->afterCreating(function (Order $o) {
+            // Update the order's finance data with random amounts.
+            $orderSubtotal = 0.0;
+
+            foreach ($o->orderItems as $i) {
+                $orderSubtotal += ($i->price * $i->quantity);
+            }
+
+            $o->charged_subtotal = $orderSubtotal;
+            $o->charged_shipping_fee = $orderSubtotal * 0.10;
+            $o->charged_tax = ($o->charged_subtotal + $o->charged_shipping_fee) * 0.13;
             $o->save();
-        })->afterCreating(function (Order $user) {
-            //
-            // BMD-TODO: Create order-items.
         });
     }
 
@@ -99,36 +104,53 @@ class OrderFactory extends Factory
 
             $dateTime = $date . ' ' . $h . ':00:00';
 
-            Order::factory()->count($numOfOrdersToCreateThisHour)->make([
-                // BMD-TODO: add other props needed
-                'created_at' => $dateTime,
-                'updated_at' => $dateTime,
-                'earliest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 2),
-                'latest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 3)
-            ]);
+            Order::factory()
+                ->count($numOfOrdersToCreateThisHour)
+                ->createWithUuid()
+                ->has(OrderItem::factory()->count(rand(1, 3)))
+                ->make([
+                    'created_at' => $dateTime,
+                    'updated_at' => $dateTime,
+                    'earliest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 2),
+                    'latest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 3)
+                ])
+                ->create();
         }
     }
 
 
 
-    public static function randomCreate()
+    public function createWithUuid()
     {
-        // return Order::factory()->make();
+        return $this->state(function (array $attributes) {
+            return [
+                'id' => Str::uuid()->toString()
+            ];
+        });
+    }
 
 
-        // BMD-TODO: add other props needed
-        return Order::factory()->make([
-            // 'id' => Str::uuid()->toString(),
-            'earliest_delivery_date' => GeneralHelper::getDateInStrWithData('2021-02-16', 2),
-            'latest_delivery_date' => GeneralHelper::getDateInStrWithData('2021-02-16', 3),
-            'created_at' => '2021-02-16',
-            'updated_at' => '2021-02-16'
-        ]);
+
+    public static function testRandomCreate()
+    {
+        return Order::factory()->createWithUuid()
+            ->has(OrderItem::factory()->count(rand(1, 3)))
+            ->create();
+
+
+
+        // return Order::factory()->make([
+        //     // 'id' => Str::uuid()->toString(),
+        //     'earliest_delivery_date' => GeneralHelper::getDateInStrWithData('2021-02-16', 2),
+        //     'latest_delivery_date' => GeneralHelper::getDateInStrWithData('2021-02-16', 3),
+        //     'created_at' => '2021-02-16',
+        //     'updated_at' => '2021-02-16'
+        // ]);
 
 
 
         // Tinker codes.
         // $fPath = Database\Factories\OrderFactory::class
-        // $o = $fPath::randomCreate()
+        // $o = $fPath::testRandomCreate()
     }
 }
