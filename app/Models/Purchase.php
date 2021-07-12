@@ -11,34 +11,6 @@ class Purchase extends Model
 {
     use HasFactory;
     use CanGenerateOPIsTrait;
-    
-
-
-    public static function getTodaysPurchases()
-    {
-        $dateObjToday = getdate();
-
-        $startDateTodayInStr = $dateObjToday['year'] . '-' . $dateObjToday['mon'] . '-' . $dateObjToday['mday'];
-        $endDateTodayInStr = $startDateTodayInStr . ' 23:59:59';
-
-
-        $purchasesToday = self::where('created_at', '>=', $startDateTodayInStr)
-            ->where('created_at', '<=', $endDateTodayInStr)
-            ->get();
-
-        return $purchasesToday;
-    }
-
-
-
-    public static function updateTodaysPurchasesStatus()
-    {
-        $todaysPurchases = self::getTodaysPurchases();
-
-        foreach ($todaysPurchases as $p) {
-            $p->updatePurchaseStatusBasedOnPurchaseItemsStatuses();
-        }
-    }
 
 
 
@@ -195,23 +167,14 @@ class Purchase extends Model
 
                     DB::commit();
                 }
+
+
+                $statusCodeForOrderToBePurchased = OrderStatus::getCodeByName('TO_BE_PURCHASED');
+                $o->status_code = $statusCodeForOrderToBePurchased;
+                $o->save();
+                
             }
         }
-    }
-
-
-
-    public static function doTodaysPurchasesAlreadyIncludeFromSeller($seller)
-    {
-        $todaysPurchases = self::getTodaysPurchases();
-
-        foreach ($todaysPurchases as $p) {
-            if ($p->seller_id == $seller->id) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
 

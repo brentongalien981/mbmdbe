@@ -43,6 +43,15 @@ class GeneralHelper
 
 
 
+    public static function getTodaysDateInStr()
+    {
+        $dateObjToday = getdate();
+
+        return $dateObjToday['year'] . '-' . $dateObjToday['mon'] . '-' . $dateObjToday['mday'];
+    }
+
+
+
     public static function getDateInStrWithData($startDateInStr, $numDaysToAdd = 0)
     {
         $startDateTimeStamp = strtotime($startDateInStr);

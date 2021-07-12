@@ -108,13 +108,12 @@ class OrderFactory extends Factory
                 ->count($numOfOrdersToCreateThisHour)
                 ->createWithUuid()
                 ->has(OrderItem::factory()->count(rand(1, 3)))
-                ->make([
+                ->create([
                     'created_at' => $dateTime,
                     'updated_at' => $dateTime,
                     'earliest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 2),
                     'latest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 3)
-                ])
-                ->create();
+                ]);
         }
     }
 
@@ -152,5 +151,9 @@ class OrderFactory extends Factory
         // Tinker codes.
         // $fPath = Database\Factories\OrderFactory::class
         // $o = $fPath::testRandomCreate()
+
+        // $of = Database\Factories\OrderFactory::class
+        // $d = '2021-06-01';
+        // $of::generateFakeBmdOrders($d, 2)
     }
 }
