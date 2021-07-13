@@ -30,6 +30,8 @@ class HandleGenerateOPIsEvent implements ShouldQueue
 
     public $commandData = null;
     private $numDaysForOrderCreation = 0;
+    private $numOfOrderProcessedDays = 0;
+    private $numOfPurchaseProcessedDays = 0;
 
 
 
@@ -92,7 +94,7 @@ class HandleGenerateOPIsEvent implements ShouldQueue
     }
 
 
-
+    // BMD-TODO
     public function updateLogs($data)
     {
         $partialExecutionEndTimeInSec = microtime(true);
@@ -103,12 +105,16 @@ class HandleGenerateOPIsEvent implements ShouldQueue
         if (isset($data['isForCheckpointUpdate'])) {
 
             if (isset($data['ithDayOfOrderCreation'])) {
-                $msg .= 'num of order days creation processed: ' . $data['ithDayOfOrderCreation'] . ' / ' . $this->numDaysForOrderCreation . ' \n';
+                $this->numOfOrderProcessedDays = $data['ithDayOfOrderCreation'];
             }
 
             if (isset($data['ithDayOfPurchaseCreation'])) {
-                $msg .= 'num of purchase days creation processed: ' . $data['ithDayOfPurchaseCreation'] . ' / ' . $this->numDaysForOrderCreation . ' \n';
+                $this->numOfPurchaseProcessedDays = $data['ithDayOfPurchaseCreation'];
             }
+
+            $msg .= 'num of order days creation processed: ' . $this->numOfOrderProcessedDays . ' / ' . $this->numDaysForOrderCreation . ' \n';
+            $msg .= 'num of purchase days creation processed: ' . $this->numOfPurchaseProcessedDays . ' / ' . $this->numDaysForOrderCreation . ' \n';
+
         } else if ($data['isForFinalizationUpdate']) {
 
             $this->myScheduleTaskLog->execution_period = $partialExecutionPeriod;
@@ -180,6 +186,11 @@ class HandleGenerateOPIsEvent implements ShouldQueue
 
 
         Purchase::generateBmdPurchases($d['dateFrom'], $d['dateTo'], $this);
+
+        $purchasesPeriodStartDate = GeneralHelper::getDateInStrWithData($d['dateFrom'], 1);
+        $purchasesPeriodEndDate = GeneralHelper::getDateInStrWithData($d['dateTo'], 1);
+
+        Purchase::fillPurchasesFinanceStatsBasedOnPurchaseItemsForPeriod($purchasesPeriodStartDate, $purchasesPeriodEndDate);
     }
 
 

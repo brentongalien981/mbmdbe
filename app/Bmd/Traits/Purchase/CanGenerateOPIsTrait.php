@@ -79,6 +79,7 @@ trait CanGenerateOPIsTrait
                                 $pi->seller_product_id = $sellerProduct->id;
                                 $pi->size_availability_id = $oi->size_availability_id;
                                 $pi->projected_price = $oi->price;
+                                $pi->actual_price = $oi->price;
                             }
                         } else {
 
@@ -96,6 +97,7 @@ trait CanGenerateOPIsTrait
                             $pi->seller_product_id = $sellerProduct->id;
                             $pi->size_availability_id = $oi->size_availability_id;
                             $pi->projected_price = $oi->price;
+                            $pi->actual_price = $oi->price;
                         }
 
 
@@ -208,6 +210,41 @@ trait CanGenerateOPIsTrait
     {
         $startDateTodayInStr = GeneralHelper::getTodaysDateInStr();
         return self::getPurchasesForDate($startDateTodayInStr);
+    }
+
+
+
+    // BMD-TODO
+    public static function fillPurchasesFinanceStatsBasedOnPurchaseItemsForPeriod($startDate, $endDate)
+    {
+        $period = GeneralHelper::getNumDaysBetweenDates($startDate, $endDate) + 1;
+
+        for ($i = 0; $i < $period; $i++) {
+
+            $thatDate = GeneralHelper::getDateInStrWithData($startDate, $i);
+            $purchasesThatDate = self::getPurchasesForDate($thatDate);
+
+            foreach ($purchasesThatDate as $p) {
+                $p->fillFinanceStatsBasedOnPurchaseItems();
+            }
+        }
+    }
+
+
+
+    public function fillFinanceStatsBasedOnPurchaseItems() 
+    {
+        $subtotal = 0.0;
+
+        foreach ($this->purchaseItems as $pi) {
+            $soldPrice = $pi->actual_price ?? $pi->projected_price;
+            $subtotal += ($soldPrice * $pi->quantity);
+        }
+
+        $this->charged_subtotal = $subtotal;
+        $this->charged_shipping_fee = $subtotal * 0.10;
+        $this->charged_tax = ($this->charged_subtotal + $this->charged_shipping_fee) * 0.13;
+        $this->save();
     }
 
 
