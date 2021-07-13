@@ -64,7 +64,7 @@ trait CanGenerateOPIsTrait
                         if (self::arePurchasesAlreadyIncludedFromSellerForDate($seller, $nextDate)) {
 
                             // Update purchase-item's qty.
-                            $p = self::getPurchaseWithSellerId($seller->id);
+                            $p = self::getPurchaseWithSellerIdForDate($seller->id, $nextDate);
                             $pi = PurchaseItem::where('purchase_id', $p->id)
                                 ->where('seller_product_id', $sellerProduct->id)
                                 ->where('size_availability_id', $oi->size_availability_id)
@@ -79,11 +79,7 @@ trait CanGenerateOPIsTrait
                                 $pi->seller_product_id = $sellerProduct->id;
                                 $pi->size_availability_id = $oi->size_availability_id;
                                 $pi->projected_price = $oi->price;
-                                $pi->status_code = PurchaseItemStatus::where('name', PurchaseItemStatus::NAME_FOR_STATUS_DISPATCHED)->get()[0]->code;
                             }
-
-                            $pi->quantity += $oi->quantity;
-                            
                         } else {
 
                             // Create Purchase.
@@ -99,15 +95,15 @@ trait CanGenerateOPIsTrait
                             $pi->purchase_id = $p->id;
                             $pi->seller_product_id = $sellerProduct->id;
                             $pi->size_availability_id = $oi->size_availability_id;
-                            $pi->quantity = $oi->quantity;
                             $pi->projected_price = $oi->price;
-                            $pi->status_code = PurchaseItemStatus::where('name', PurchaseItemStatus::NAME_FOR_STATUS_DISPATCHED)->get()[0]->code;
                         }
 
 
+                        $pi->quantity += $oi->quantity;
+                        $pi->status_code = PurchaseItemStatus::where('name', PurchaseItemStatus::NAME_FOR_STATUS_DISPATCHED)->get()[0]->code;
                         $pi->created_at = $nextDate;
                         $pi->save();
-                        
+
 
 
                         // Update the InventoryItem's stats.
@@ -148,11 +144,25 @@ trait CanGenerateOPIsTrait
 
 
             $eHandler->updateLogs([
-                'ithDayOfPurchaseCreation' => $i+1,
+                'ithDayOfPurchaseCreation' => $i + 1,
                 'isForCheckpointUpdate' => true
             ]);
         }
+    }
 
+
+
+    public static function getPurchaseWithSellerIdForDate($sellerId, $nextDate)
+    {
+        $purchases = self::getPurchasesForDate($nextDate);
+
+        foreach ($purchases as $p) {
+            if ($p->seller_id == $sellerId) {
+                return $p;
+            }
+        }
+
+        return null;
     }
 
 
@@ -182,7 +192,7 @@ trait CanGenerateOPIsTrait
     public static function getPurchasesForDate($date)
     {
         $startDate = $date;
-        $endDate = $date. ' 23:59:59';
+        $endDate = $date . ' 23:59:59';
 
 
         $purchases = self::where('created_at', '>=', $startDate)
@@ -197,13 +207,7 @@ trait CanGenerateOPIsTrait
     public static function getTodaysPurchases()
     {
         $startDateTodayInStr = GeneralHelper::getTodaysDateInStr();
-        $endDateTodayInStr = $startDateTodayInStr . ' 23:59:59';
-
-        $purchases = self::where('created_at', '>=', $startDateTodayInStr)
-            ->where('created_at', '<=', $endDateTodayInStr)
-            ->get();
-
-        return $purchases;
+        return self::getPurchasesForDate($startDateTodayInStr);
     }
 
 
@@ -231,7 +235,4 @@ trait CanGenerateOPIsTrait
 
         return false;
     }
-
-
-
 }

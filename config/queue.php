@@ -89,4 +89,13 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    // 'failed' => [
+    //     'driver' => env('QUEUE_FAILED_DRIVER', 'dynamodb'),
+    //     'key' => env('QUEUE_FAILED_AWS_ACCESS_KEY_ID'),
+    //     'secret' => env('QUEUE_FAILED_AWS_SECRET_ACCESS_KEY'),
+    //     'region' => env('QUEUE_FAILED_AWS_DEFAULT_REGION', 'us-east-2'),
+    //     'table' => env('QUEUE_FAILED_DYNAMODB_TABLE'),
+    // ],
+    
+
 ];

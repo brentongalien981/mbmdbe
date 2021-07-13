@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use Exception;
+use Throwable;
 use App\Models\Purchase;
 use App\Models\ScheduledTask;
 use App\Models\ScheduledTaskLog;
@@ -16,7 +17,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class HandleGenerateOPIsEvent implements ShouldQueue
 {
-    public $queue = BmdGlobalConstants::QUEUE_FOR_HANDLING_MANUAL_SCHEDULED_TASK_DISPATCHES;
+    public $failOnTimeout = true;
+    public $queue = BmdGlobalConstants::QUEUE_FOR_HANDLING_LONG_MANUAL_SCHEDULED_TASK_DISPATCHES;
+
+
+
     public $myScheduledTask = null;
     public $myScheduleTaskLog = null;
     public $executionStartTimeInSec = 0;
@@ -104,9 +109,8 @@ class HandleGenerateOPIsEvent implements ShouldQueue
             if (isset($data['ithDayOfPurchaseCreation'])) {
                 $msg .= 'num of purchase days creation processed: ' . $data['ithDayOfPurchaseCreation'] . ' / ' . $this->numDaysForOrderCreation . ' \n';
             }
-
         } else if ($data['isForFinalizationUpdate']) {
-            
+
             $this->myScheduleTaskLog->execution_period = $partialExecutionPeriod;
             $this->myScheduleTaskLog->status_code = $this->isResultOk ? ScheduledTaskStatus::where('name', 'PROCESS_SUCCEEDED')->get()[0]->code : ScheduledTaskStatus::where('name', 'PROCESS_FAILED')->get()[0]->code;
             $this->myScheduleTaskLog->is_successful = $this->isResultOk ? 1 : 0;
@@ -115,7 +119,7 @@ class HandleGenerateOPIsEvent implements ShouldQueue
             $msg .= $data['extraMsg'];
         }
 
-        
+
         $this->myScheduleTaskLog->execution_period = $partialExecutionPeriod;
         $this->myScheduleTaskLog->entire_process_logs = $msg;
         $this->myScheduleTaskLog->save();
@@ -169,7 +173,7 @@ class HandleGenerateOPIsEvent implements ShouldQueue
             OrderFactory::generateFakeBmdOrders($date, $maxNumOrdersForCurrentPeriod);
 
             $this->updateLogs([
-                'ithDayOfOrderCreation' => $i+1,
+                'ithDayOfOrderCreation' => $i + 1,
                 'isForCheckpointUpdate' => true
             ]);
         }
@@ -224,5 +228,21 @@ class HandleGenerateOPIsEvent implements ShouldQueue
 
 
         return $maxNumOrdersForCurrentPeriod + round($numOrdersToBeAddedOrDeleted);
+    }
+
+
+
+    public function failed(Throwable $e)
+    {
+        $st = ScheduledTask::where('command_signature', 'GenerateOPIs:Execute')->get()[0];
+        $stLog = ScheduledTaskLog::where('scheduled_task_id', $st->id)->latest()->get()[0];
+
+        $stLog->status_code = ScheduledTaskStatus::where('name', 'PROCESS_FAILED')->get()[0]->code;
+        $stLog->is_successful = 0;
+
+        $eLogStr = GeneralHelper::extractErrorTrace($e);
+        $stLog->entire_process_logs .= $eLogStr . '\n';
+        $stLog->save();
+
     }
 }

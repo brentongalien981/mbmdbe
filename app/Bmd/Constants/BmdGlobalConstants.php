@@ -44,6 +44,7 @@ class BmdGlobalConstants
     // BMD-ON-STAGING
     public const QUEUE_FOR_EMAILING_ORDER_DETAILS = 'TestBmd-QEmailUserOrderDetails';
     public const QUEUE_FOR_HANDLING_MANUAL_SCHEDULED_TASK_DISPATCHES = 'MBMDBE-ManualScheduledTaskDispatchQ';
+    public const QUEUE_FOR_HANDLING_LONG_MANUAL_SCHEDULED_TASK_DISPATCHES = 'MBMDBE-LongManualScheduledTaskDispatchQ';
 
 
 
