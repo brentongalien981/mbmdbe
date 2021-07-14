@@ -51,6 +51,7 @@ Route::get('/automated-job-logs/read', [ScheduledTaskLogController::class, 'read
 
 /** daily-summary */
 Route::get('/daily-summary/readDailySummaryData', [DailySummaryController::class, 'readDailySummaryData'])->middleware('bmdauth');
+Route::get('/daily-summary/readFinanceGraphData', [DailySummaryController::class, 'readFinanceGraphData'])->middleware('bmdauth');
 
 
 
