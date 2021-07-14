@@ -54,9 +54,24 @@ class GeneralHelper
 
     public static function getDateInStrWithData($startDateInStr, $numDaysToAdd = 0)
     {
-        $startDateTimeStamp = strtotime($startDateInStr);
+        $unixTimestamp = strtotime($startDateInStr);
+        return self::getDateInStrWithUnixTimestamp($unixTimestamp, $numDaysToAdd);
+    }
+
+
+
+    public static function getDateInStrWithDbTimestamp($dbTimestamp, $numDaysToAdd = 0)
+    {
+        $unixTimestamp = strtotime($dbTimestamp);
+        return self::getDateInStrWithUnixTimestamp($unixTimestamp, $numDaysToAdd);
+    }
+
+
+
+    public static function getDateInStrWithUnixTimestamp($unixTimestamp, $numDaysToAdd = 0)
+    {
         $numOfSecToAdd = $numDaysToAdd * BmdGlobalConstants::NUM_OF_SEC_IN_DAY;
-        $date = getdate($startDateTimeStamp + $numOfSecToAdd);
+        $date = getdate($unixTimestamp + $numOfSecToAdd);
 
         return $date['year'] . '-' . self::getMonthNumWithZeroPadding($date) . '-' .  self::getDayNumWithZeroPadding($date);
     }

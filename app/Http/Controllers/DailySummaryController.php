@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Bmd\Generals\GeneralHelper;
 use Exception;
 use App\Models\Order;
 use App\Models\Purchase;
@@ -86,36 +87,71 @@ class DailySummaryController extends Controller
             ->get();
 
 
-        $periodTimingMode = 1; // daily
-        $revenuesByTimingMode = [];
+        $period = 1; // BMD-TODO: Could be yearly, monthly, weekly, daily...
+        $revenuesByPeriod = [];
+
+        $periodsFirstOrder = $orders[0] ?? null;
+        $i = 0;
+        $revenueForPeriod = 0.0;
+
         $ordersCount = $orders->count();
 
-        $revenueInOneTimingMode = 0.0;
-        $ithTimingModeStartDate = $orders[0]->created_at;
+        $isEndOfPeriod = false;
+        $isLastOrderForPeriod = false;
+        $previousOrder = null;
+        $dateOfOrdersThisPeriod = [];
 
-        for ($i = 0; $i < $ordersCount; $i++) {
-            
-            if (($i != 0) && ($i % $periodTimingMode == 0)) {
 
-                $ithTimingModeEndDate = $orders[$i]->created_at;
+        foreach ($orders as $o) {
 
-                $revenuesByTimingMode[] = [
-                    'startDate' => $ithTimingModeStartDate,
-                    'endDate' => $ithTimingModeEndDate,
-                    'revenue' => $revenueInOneTimingMode
-                ];
+            $dateObjForPeriodsFirstOrder = getdate(strtotime($periodsFirstOrder->created_at));
+            $dateObjForCurrentOrder = getdate(strtotime($o->created_at));
 
-                $ithTimingModeStartDate = $ithTimingModeEndDate;
-                $revenueInOneTimingMode = 0.0;
+            $dateInterval = $dateObjForCurrentOrder['yday'] - $dateObjForPeriodsFirstOrder['yday'];
+
+
+            // Cases when to append to revenuesByPeriod.
+            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $period == 0)) {
+                $isEndOfPeriod = true;
+            }
+            if ((!$isEndOfPeriod) && ($ordersCount == $i + 1)) {
+                $isLastOrderForPeriod = true;
+                $revenueForPeriod += $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
+                $previousOrder = $o;
+                $dateOfOrdersThisPeriod[] = $o->created_at;
             }
 
-            $o = $orders[$i];
-            $revenueInOneTimingMode = $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
+
+            if ($isEndOfPeriod || $isLastOrderForPeriod) {
+
+                if (!isset($previousOrder)) {
+                    $previousOrder = $o;
+                } // Just a base case.
+
+                $revenuesByPeriod[] = [
+                    'startDate' => GeneralHelper::getDateInStrWithDbTimestamp($periodsFirstOrder->created_at),
+                    'endDate' => GeneralHelper::getDateInStrWithDbTimestamp($previousOrder->created_at),
+                    'revenue' => $revenueForPeriod,
+                    'dateOfOrdersThisPeriod' => $dateOfOrdersThisPeriod
+                ];
+
+                // Refresh values for new period.
+                $revenueForPeriod = 0.0;
+                $periodsFirstOrder = $o;
+                $isEndOfPeriod = false;
+                $dateOfOrdersThisPeriod = [];
+            }
+
+
+            $revenueForPeriod += $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
+            $previousOrder = $o;
+            $dateOfOrdersThisPeriod[] = $o->created_at;
+            ++$i;
         }
 
 
         return [
-            'revenuesByTimingMode' => $revenuesByTimingMode
+            'revenuesByPeriod' => $revenuesByPeriod
         ];
     }
 }
