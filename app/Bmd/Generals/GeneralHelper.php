@@ -78,6 +78,37 @@ class GeneralHelper
 
 
 
+    public static function getDateTimeInStrWithDbTimestamp($dbTimestamp, $numDaysToAdd = 0)
+    {
+        $unixTimestamp = strtotime($dbTimestamp);
+        return self::getDateTimeInStrWithUnixTimestamp($unixTimestamp, $numDaysToAdd);
+    }
+
+
+
+    public static function getDateTimeInStrWithUnixTimestamp($unixTimestamp, $numDaysToAdd = 0)
+    {
+        $numOfSecToAdd = $numDaysToAdd * BmdGlobalConstants::NUM_OF_SEC_IN_DAY;
+        $date = getdate($unixTimestamp + $numOfSecToAdd);
+
+        $dateTimeInStr = $date['year'] . '-' . self::getMonthNumWithZeroPadding($date) . '-' .  self::getDayNumWithZeroPadding($date);
+        $dateTimeInStr .= ' ' . self::padWithZeroForTensDigit($date['hours']) . ':' . self::padWithZeroForTensDigit($date['minutes']) . ':' . self::padWithZeroForTensDigit($date['seconds']);
+
+        return $dateTimeInStr;
+    }
+
+
+
+    public static function padWithZeroForTensDigit($num) 
+    {
+        if ($num <= 9) {
+            return '0' . $num;
+        }
+        return $num;
+    }
+
+
+
     public static function getMonthNumWithZeroPadding($date)
     {
         $monthNum = $date['mon'];

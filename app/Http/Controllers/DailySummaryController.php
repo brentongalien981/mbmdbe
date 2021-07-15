@@ -78,28 +78,48 @@ class DailySummaryController extends Controller
 
     public function getFinanceGraphData(Request $r)
     {
-        $startDate = $r->graphStartDate;
-        $endDate = $r->graphEndDate . ' 23:59:59';
+        // Data for revenues.
+        $d = [
+            'startDate' => $r->graphStartDate,
+            'endDate' => $r->graphEndDate . ' 23:59:59',
+            'period' => 1, // BMD-TODO: Add this to the request params
+        ];
 
-        $orders = Order::where('created_at', '>=', $startDate)
-            ->where('created_at', '<=', $endDate)
+        $numOfPeriods = (GeneralHelper::getNumDaysBetweenDates($d['startDate'], $d['endDate']) / $d['period']) + 1;
+
+
+        return [
+            'revenuesByPeriod' => $this->getPeriodicRevenuesWithData($d),
+            'expensesByPeriod' => $this->getPeriodicExpensesWithData($d),
+            'numOfPeriods' => $numOfPeriods,
+            'period' => $d['period'],
+            'dateSpanStartDate' => $r->graphStartDate,
+            'dateSpanEndDate' => $r->graphEndDate
+        ];
+    }
+
+
+
+    public function getPeriodicRevenuesWithData($data)
+    {
+        $orders = Order::where('created_at', '>=', $data['startDate'])
+            ->where('created_at', '<=', $data['endDate'])
             ->orderBy('created_at', 'ASC')
             ->get();
 
 
-        $period = 1; // BMD-TODO: Could be yearly, monthly, weekly, daily...
+        $ordersCount = $orders->count();
         $revenuesByPeriod = [];
-
-        $periodsFirstOrder = $orders[0] ?? null;
-        $i = 0;
         $revenueForPeriod = 0.0;
 
-        $ordersCount = $orders->count();
+        $periodsFirstOrder = $orders[0] ?? null;
 
         $isEndOfPeriod = false;
-        $isLastOrderForPeriod = false;
+        $isLastOrder = false;
         $previousOrder = null;
         $dateOfOrdersThisPeriod = [];
+
+        $i = 0;
 
 
         foreach ($orders as $o) {
@@ -110,23 +130,25 @@ class DailySummaryController extends Controller
             $dateInterval = $dateObjForCurrentOrder['yday'] - $dateObjForPeriodsFirstOrder['yday'];
 
 
-            // Cases when to append to revenuesByPeriod.
-            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $period == 0)) {
+            // If it's end of period.
+            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['period'] == 0)) {
                 $isEndOfPeriod = true;
             }
+
+            // If it's the last order, but not the end of period.
             if ((!$isEndOfPeriod) && ($ordersCount == $i + 1)) {
-                $isLastOrderForPeriod = true;
+                $isLastOrder = true;
                 $revenueForPeriod += $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
                 $previousOrder = $o;
-                $dateOfOrdersThisPeriod[] = $o->created_at;
+                $dateOfOrdersThisPeriod[] = GeneralHelper::getDateTimeInStrWithDbTimestamp($o->created_at);
             }
 
 
-            if ($isEndOfPeriod || $isLastOrderForPeriod) {
+            if ($isEndOfPeriod || $isLastOrder) {
 
                 if (!isset($previousOrder)) {
-                    $previousOrder = $o;
-                } // Just a base case.
+                    $previousOrder = $o; // Just a base case.
+                }
 
                 $revenuesByPeriod[] = [
                     'startDate' => GeneralHelper::getDateInStrWithDbTimestamp($periodsFirstOrder->created_at),
@@ -145,13 +167,88 @@ class DailySummaryController extends Controller
 
             $revenueForPeriod += $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
             $previousOrder = $o;
-            $dateOfOrdersThisPeriod[] = $o->created_at;
+            $dateOfOrdersThisPeriod[] = GeneralHelper::getDateTimeInStrWithDbTimestamp($o->created_at);
             ++$i;
         }
 
 
-        return [
-            'revenuesByPeriod' => $revenuesByPeriod
-        ];
+        return $revenuesByPeriod;
+    }
+
+
+
+    public function getPeriodicExpensesWithData($data)
+    {
+        $purchases = Purchase::where('created_at', '>=', $data['startDate'])
+            ->where('created_at', '<=', $data['endDate'])
+            ->orderBy('created_at', 'ASC')
+            ->get();
+
+
+        $purchasesCount = $purchases->count();
+        $expensesByPeriod = [];
+        $expensesForPeriod = 0.0;
+
+        $periodsFirstPurchase = $purchases[0] ?? null;
+
+        $isEndOfPeriod = false;
+        $isLastPurchase = false;
+        $previousPurchase = null;
+        $dateOfPurchasesThisPeriod = [];
+
+        $i = 0;
+
+
+        foreach ($purchases as $p) {
+
+            $dateObjForPeriodsFirstPurchase = getdate(strtotime($periodsFirstPurchase->created_at));
+            $dateObjForCurrentPurchase = getdate(strtotime($p->created_at));
+
+            $dateInterval = $dateObjForCurrentPurchase['yday'] - $dateObjForPeriodsFirstPurchase['yday'];
+
+
+            // If it's end of period.
+            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['period'] == 0)) {
+                $isEndOfPeriod = true;
+            }
+
+            // If it's the last order, but not the end of period.
+            if ((!$isEndOfPeriod) && ($purchasesCount == $i + 1)) {
+                $isLastPurchase = true;
+                $expensesForPeriod += $p->charged_subtotal + $p->charged_shipping_fee + $p->charged_tax + $p->charged_other_fee;
+                $previousPurchase = $p;
+                $dateOfPurchasesThisPeriod[] = GeneralHelper::getDateTimeInStrWithDbTimestamp($p->created_at);
+            }
+
+
+            if ($isEndOfPeriod || $isLastPurchase) {
+
+                if (!isset($previousPurchase)) {
+                    $previousPurchase = $p; // Just a base case.
+                }
+
+                $expensesByPeriod[] = [
+                    'startDate' => GeneralHelper::getDateInStrWithDbTimestamp($periodsFirstPurchase->created_at),
+                    'endDate' => GeneralHelper::getDateInStrWithDbTimestamp($previousPurchase->created_at),
+                    'expenses' => $expensesForPeriod,
+                    'dateOfPurchasesThisPeriod' => $dateOfPurchasesThisPeriod
+                ];
+
+                // Refresh values for new period.
+                $expensesForPeriod = 0.0;
+                $periodsFirstPurchase = $p;
+                $isEndOfPeriod = false;
+                $dateOfPurchasesThisPeriod = [];
+            }
+
+
+            $expensesForPeriod += $p->charged_subtotal + $p->charged_shipping_fee + $p->charged_tax + $p->charged_other_fee;
+            $previousPurchase = $p;
+            $dateOfPurchasesThisPeriod[] = GeneralHelper::getDateTimeInStrWithDbTimestamp($p->created_at);
+            ++$i;
+        }
+
+
+        return $expensesByPeriod;
     }
 }
