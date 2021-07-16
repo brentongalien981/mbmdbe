@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Models\IncompleteOrder;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use Symfony\Component\CssSelector\Node\FunctionNode;
 
 class DailySummaryController extends Controller
 {
@@ -76,26 +77,65 @@ class DailySummaryController extends Controller
 
 
 
+    public function readFinanceGraphData(Request $r)
+    {
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'financeGraphData' => $this->getFinanceGraphData($r)
+            ]
+        ];
+    }
+
+
+
     public function getFinanceGraphData(Request $r)
     {
+        $periodNumDays = 1; // daily
+        switch ($r->graphFilterSelectedPeriod) {
+            case 'weekly':
+                $periodNumDays = 7;
+                break;
+            case 'monthly':
+                $periodNumDays = 30;
+                break;
+            case 'yearly':
+                $periodNumDays = 364;
+                break;
+        }
+
+
         // Data for revenues.
         $d = [
             'startDate' => $r->graphStartDate,
             'endDate' => $r->graphEndDate . ' 23:59:59',
-            'period' => 1, // BMD-TODO: Add this to the request params
+            'periodNumDays' => $periodNumDays
         ];
 
-        $numOfPeriods = (GeneralHelper::getNumDaysBetweenDates($d['startDate'], $d['endDate']) / $d['period']) + 1;
+        $numOfPeriods = (GeneralHelper::getNumDaysBetweenDates($d['startDate'], $d['endDate']) / $d['periodNumDays']) + 1;
 
 
         return [
             'revenuesByPeriod' => $this->getPeriodicRevenuesWithData($d),
             'expensesByPeriod' => $this->getPeriodicExpensesWithData($d),
             'numOfPeriods' => $numOfPeriods,
-            'period' => $d['period'],
+            'periodNumDays' => $d['periodNumDays'],
             'dateSpanStartDate' => $r->graphStartDate,
             'dateSpanEndDate' => $r->graphEndDate
         ];
+    }
+
+
+    // BMD-TODO
+    public function test_xxx() 
+    {
+        $d = [
+            'startDate' => '2021-06-15',
+            'endDate' => '2021-07-15' . ' 23:59:59',
+            'periodNumDays' => 7
+        ];
+
+        $revenuesByPeriod = $this->getPeriodicRevenuesWithData($d);
     }
 
 
@@ -131,7 +171,7 @@ class DailySummaryController extends Controller
 
 
             // If it's end of period.
-            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['period'] == 0)) {
+            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['periodNumDays'] == 0)) {
                 $isEndOfPeriod = true;
             }
 
@@ -208,7 +248,7 @@ class DailySummaryController extends Controller
 
 
             // If it's end of period.
-            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['period'] == 0)) {
+            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['periodNumDays'] == 0)) {
                 $isEndOfPeriod = true;
             }
 
