@@ -91,45 +91,6 @@ class DailySummaryController extends Controller
 
 
 
-    // BMD-DELETE
-    public function old_getFinanceGraphData(Request $r)
-    {
-        $periodNumDays = 1; // daily
-        switch ($r->graphFilterSelectedPeriod) {
-            case 'weekly':
-                $periodNumDays = 7;
-                break;
-            case 'monthly':
-                $periodNumDays = 30;
-                break;
-            case 'yearly':
-                $periodNumDays = 364;
-                break;
-        }
-
-
-        // Data for revenues.
-        $d = [
-            'startDate' => $r->graphStartDate,
-            'endDate' => $r->graphEndDate . ' 23:59:59',
-            'periodNumDays' => $periodNumDays
-        ];
-
-        $numOfPeriods = (GeneralHelper::getNumDaysBetweenDates($d['startDate'], $d['endDate']) / $d['periodNumDays']) + 1;
-
-
-        return [
-            'revenuesByPeriod' => $this->getPeriodicRevenuesWithData($d),
-            'expensesByPeriod' => $this->getPeriodicExpensesWithData($d),
-            'numOfPeriods' => $numOfPeriods,
-            'periodNumDays' => $d['periodNumDays'],
-            'dateSpanStartDate' => $r->graphStartDate,
-            'dateSpanEndDate' => $r->graphEndDate
-        ];
-    }
-
-
-
     public function getFinanceGraphData(Request $r)
     {
         $d = [
@@ -170,7 +131,7 @@ class DailySummaryController extends Controller
 
 
 
-    // BMD-DELETE
+    // BMD-ON-STAGING: Deprecated. Delete this. 
     public function getPeriodicRevenuesWithData($data)
     {
         $orders = Order::where('created_at', '>=', $data['startDate'])
