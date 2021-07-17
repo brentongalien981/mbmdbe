@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use App\Models\IncompleteOrder;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\Resources\ExpenseResourceFromPurchase;
+use App\Http\Resources\RevenueResrouceFromOrder;
 use Symfony\Component\CssSelector\Node\FunctionNode;
 
 class DailySummaryController extends Controller
@@ -89,7 +91,8 @@ class DailySummaryController extends Controller
 
 
 
-    public function getFinanceGraphData(Request $r)
+    // BMD-DELETE
+    public function old_getFinanceGraphData(Request $r)
     {
         $periodNumDays = 1; // daily
         switch ($r->graphFilterSelectedPeriod) {
@@ -126,20 +129,48 @@ class DailySummaryController extends Controller
     }
 
 
-    // BMD-TODO
-    public function test_xxx() 
+
+    public function getFinanceGraphData(Request $r)
     {
         $d = [
-            'startDate' => '2021-06-15',
-            'endDate' => '2021-07-15' . ' 23:59:59',
-            'periodNumDays' => 7
+            'startDate' => $r->graphStartDate,
+            'endDate' => $r->graphEndDate . ' 23:59:59'
         ];
 
-        $revenuesByPeriod = $this->getPeriodicRevenuesWithData($d);
+        
+        return [
+            'revenuesByPeriod' => $this->getPeriodRevenues($d),
+            'expensesByPeriod' => $this->getPeriodExpenses($d)
+        ];
     }
 
 
 
+    public function getPeriodRevenues($data)
+    {
+        $orders = Order::where('created_at', '>=', $data['startDate'])
+            ->where('created_at', '<=', $data['endDate'])
+            ->orderBy('created_at', 'ASC')
+            ->get();
+
+        return RevenueResrouceFromOrder::collection($orders);
+    }
+
+
+
+    public function getPeriodExpenses($data)
+    {
+        $purchases = Purchase::where('created_at', '>=', $data['startDate'])
+            ->where('created_at', '<=', $data['endDate'])
+            ->orderBy('created_at', 'ASC')
+            ->get();
+
+        return ExpenseResourceFromPurchase::collection($purchases);
+    }
+
+
+
+    // BMD-DELETE
     public function getPeriodicRevenuesWithData($data)
     {
         $orders = Order::where('created_at', '>=', $data['startDate'])
@@ -213,82 +244,5 @@ class DailySummaryController extends Controller
 
 
         return $revenuesByPeriod;
-    }
-
-
-
-    public function getPeriodicExpensesWithData($data)
-    {
-        $purchases = Purchase::where('created_at', '>=', $data['startDate'])
-            ->where('created_at', '<=', $data['endDate'])
-            ->orderBy('created_at', 'ASC')
-            ->get();
-
-
-        $purchasesCount = $purchases->count();
-        $expensesByPeriod = [];
-        $expensesForPeriod = 0.0;
-
-        $periodsFirstPurchase = $purchases[0] ?? null;
-
-        $isEndOfPeriod = false;
-        $isLastPurchase = false;
-        $previousPurchase = null;
-        $dateOfPurchasesThisPeriod = [];
-
-        $i = 0;
-
-
-        foreach ($purchases as $p) {
-
-            $dateObjForPeriodsFirstPurchase = getdate(strtotime($periodsFirstPurchase->created_at));
-            $dateObjForCurrentPurchase = getdate(strtotime($p->created_at));
-
-            $dateInterval = $dateObjForCurrentPurchase['yday'] - $dateObjForPeriodsFirstPurchase['yday'];
-
-
-            // If it's end of period.
-            if (($i != 0) && ($dateInterval != 0) && ($dateInterval % $data['periodNumDays'] == 0)) {
-                $isEndOfPeriod = true;
-            }
-
-            // If it's the last order, but not the end of period.
-            if ((!$isEndOfPeriod) && ($purchasesCount == $i + 1)) {
-                $isLastPurchase = true;
-                $expensesForPeriod += $p->charged_subtotal + $p->charged_shipping_fee + $p->charged_tax + $p->charged_other_fee;
-                $previousPurchase = $p;
-                $dateOfPurchasesThisPeriod[] = GeneralHelper::getDateTimeInStrWithDbTimestamp($p->created_at);
-            }
-
-
-            if ($isEndOfPeriod || $isLastPurchase) {
-
-                if (!isset($previousPurchase)) {
-                    $previousPurchase = $p; // Just a base case.
-                }
-
-                $expensesByPeriod[] = [
-                    'startDate' => GeneralHelper::getDateInStrWithDbTimestamp($periodsFirstPurchase->created_at),
-                    'endDate' => GeneralHelper::getDateInStrWithDbTimestamp($previousPurchase->created_at),
-                    'expenses' => $expensesForPeriod,
-                    'dateOfPurchasesThisPeriod' => $dateOfPurchasesThisPeriod
-                ];
-
-                // Refresh values for new period.
-                $expensesForPeriod = 0.0;
-                $periodsFirstPurchase = $p;
-                $isEndOfPeriod = false;
-                $dateOfPurchasesThisPeriod = [];
-            }
-
-
-            $expensesForPeriod += $p->charged_subtotal + $p->charged_shipping_fee + $p->charged_tax + $p->charged_other_fee;
-            $previousPurchase = $p;
-            $dateOfPurchasesThisPeriod[] = GeneralHelper::getDateTimeInStrWithDbTimestamp($p->created_at);
-            ++$i;
-        }
-
-
-        return $expensesByPeriod;
     }
 }
