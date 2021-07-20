@@ -148,7 +148,6 @@ class OrderFactory extends Factory
             Order::factory()
                 ->count($numOfOrdersToCreateThisHour)
                 ->createWithUuid()
-                // ->has(OrderItem::factory()->count(rand(1, 3))) BMD-DELETE
                 ->create([
                     'created_at' => $dateTime,
                     'earliest_delivery_date' => GeneralHelper::getDateInStrWithData($date, 2),

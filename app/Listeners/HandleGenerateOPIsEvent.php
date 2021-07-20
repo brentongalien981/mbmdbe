@@ -94,7 +94,7 @@ class HandleGenerateOPIsEvent implements ShouldQueue
     }
 
 
-    // BMD-TODO
+    
     public function updateLogs($data)
     {
         $partialExecutionEndTimeInSec = microtime(true);

@@ -99,7 +99,6 @@ class ScheduledTaskController extends Controller
                     $event = PrepareBmdPurchasesCommandEvent::class;
                     break;
                 case ScheduledTask::where('command_signature', 'GenerateOPIs:Execute')->get()[0]->id:
-                    // BMD-TODO
                     $commandData = GenerateOPIsEvent::extractCommandValidatedData($r);
                     GenerateOPIsEvent::guardTooManyOrdersToBeCreated($commandData);
                     $event = GenerateOPIsEvent::class;

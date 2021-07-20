@@ -214,7 +214,7 @@ trait CanGenerateOPIsTrait
 
 
 
-    // BMD-TODO
+    
     public static function fillPurchasesFinanceStatsBasedOnPurchaseItemsForPeriod($startDate, $endDate)
     {
         $period = GeneralHelper::getNumDaysBetweenDates($startDate, $endDate) + 1;
