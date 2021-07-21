@@ -98,7 +98,7 @@ class DailySummaryController extends Controller
             'endDate' => $r->graphEndDate . ' 23:59:59'
         ];
 
-        
+
         return [
             'revenuesByPeriod' => $this->getPeriodRevenues($d),
             'expensesByPeriod' => $this->getPeriodExpenses($d)
