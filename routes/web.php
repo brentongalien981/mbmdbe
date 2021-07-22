@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DailySummaryController;
+use App\Http\Controllers\MyTestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +14,10 @@ use App\Http\Controllers\DailySummaryController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+
+Route::get('/test', [MyTestController::class, 'read']);
+
 
 
 Route::get('/', function () {
