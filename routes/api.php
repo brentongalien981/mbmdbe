@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DailySummaryController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ScheduledTaskController;
@@ -52,6 +53,11 @@ Route::get('/automated-job-logs/read', [ScheduledTaskLogController::class, 'read
 /** daily-summary */
 Route::get('/daily-summary/readDailySummaryData', [DailySummaryController::class, 'readDailySummaryData'])->middleware('bmdauth');
 Route::get('/daily-summary/readFinanceGraphData', [DailySummaryController::class, 'readFinanceGraphData'])->middleware('bmdauth');
+
+
+
+/** orders */
+Route::get('/orders', [OrderController::class, 'index'])->middleware('bmdauth');
 
 
 
