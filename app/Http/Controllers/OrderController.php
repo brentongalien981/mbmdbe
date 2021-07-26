@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
@@ -14,6 +15,7 @@ class OrderController extends Controller
         $ordersWithQuery = Order::orderBy('created_at', 'desc');
         $totalNumOfProductsForQuery = $ordersWithQuery->count();
         $orders = $ordersWithQuery->take(self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE)->get();
+        $orders = OrderResource::collection($orders);
     
 
         return [
