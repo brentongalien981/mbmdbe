@@ -29,7 +29,7 @@ class OrderController extends Controller
                 'orders' => $orders,
                 'paginationData' => [
                     'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery,
-                    'pageNum' => 1
+                    'pageNum' => $r->pageNum
                 ]
             ]
         ];
