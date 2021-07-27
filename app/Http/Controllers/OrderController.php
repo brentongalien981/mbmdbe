@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\OrderResource;
+use Exception;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use App\Http\Resources\OrderResource;
+use App\Http\BmdHelpers\BmdAuthProvider;
 
 class OrderController extends Controller
 {
@@ -12,6 +15,8 @@ class OrderController extends Controller
 
     public function index(Request $r)
     {
+        Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
+        
         $ordersWithQuery = Order::orderBy('created_at', 'desc');
         $totalNumOfProductsForQuery = $ordersWithQuery->count();
         $orders = $ordersWithQuery->take(self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE)->get();
