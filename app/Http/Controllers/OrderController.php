@@ -16,12 +16,16 @@ class OrderController extends Controller
     public function index(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
-        
+
         $ordersWithQuery = Order::orderBy('created_at', 'desc');
         $totalNumOfProductsForQuery = $ordersWithQuery->count();
-        $orders = $ordersWithQuery->take(self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE)->get();
+
+        $numOfOrdersToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE;
+        $orders = $ordersWithQuery->skip($numOfOrdersToSkip)
+            ->take(self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE)
+            ->get();
         $orders = OrderResource::collection($orders);
-    
+
 
         return [
             'isResultOk' => true,
@@ -29,7 +33,9 @@ class OrderController extends Controller
                 'orders' => $orders,
                 'paginationData' => [
                     'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery,
-                    'pageNum' => $r->pageNum
+                    // BMD-DELETE
+                    'pageNum' => $r->pageNum,
+                    'numOfOrdersToSkip' => $numOfOrdersToSkip
                 ]
             ]
         ];
