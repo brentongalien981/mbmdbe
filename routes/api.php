@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DailySummaryController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ScheduledTaskController;
@@ -58,6 +59,11 @@ Route::get('/daily-summary/readFinanceGraphData', [DailySummaryController::class
 
 /** orders */
 Route::get('/orders', [OrderController::class, 'index'])->middleware('bmdauth');
+
+
+
+/** order-statuses */
+Route::get('/order-statuses', [OrderStatusController::class, 'index'])->middleware('bmdauth');
 
 
 
