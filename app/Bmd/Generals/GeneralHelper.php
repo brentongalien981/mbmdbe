@@ -144,4 +144,17 @@ class GeneralHelper
 
         return $ithDayOfTheYearForEndDate - $ithDayOfTheYearForStartDate;
     }
+
+
+
+    public static function jsonifyObj($obj)
+    {
+        $jsonifiedObj = [];
+
+        foreach ($obj as $k => $v) {
+            $jsonifiedObj[$k] = $v;
+        }
+
+        return $jsonifiedObj;
+    }
 }

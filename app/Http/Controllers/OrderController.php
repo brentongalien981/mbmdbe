@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Bmd\Generals\GeneralHelper;
 use Exception;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -32,11 +33,13 @@ class OrderController extends Controller
             'objs' => [
                 'orders' => $orders,
                 'paginationData' => [
-                    'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery,
-                    // BMD-DELETE:
-                    'pageNum' => $r->pageNum,
-                    'numOfOrdersToSkip' => $numOfOrdersToSkip
+                    'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery
                 ]
+            ],
+            'requestData' => [
+                'orderIdFilter' => $r->orderIdFilter,
+                'deliveryDaysFilter' => $r->deliveryDaysFilter,
+                'xxx' => GeneralHelper::jsonifyObj($r->request)
             ]
         ];
     }
