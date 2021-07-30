@@ -33,7 +33,7 @@ class OrderController extends Controller
                 'orders' => $orders,
                 'paginationData' => [
                     'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery,
-                    // BMD-DELETE
+                    // BMD-DELETE:
                     'pageNum' => $r->pageNum,
                     'numOfOrdersToSkip' => $numOfOrdersToSkip
                 ]
