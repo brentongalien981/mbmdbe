@@ -18,8 +18,6 @@ class OrderController extends Controller
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
 
-        // BMD-TODO: Create two query-builders to be unioned depending on if the userIdFilter has an int value.
-
 
         $orderIdFilterQueryParam = '%' . $r->orderIdFilter . '%';
         $userIdFilterQueryParam = '%' . $r->userIdFilter . '%';
@@ -37,14 +35,15 @@ class OrderController extends Controller
         $postalCodeFilterQueryParam = '%' . $r->postalCodeFilter . '%';
 
         $statusFilterQueryParam = '%' . $r->statusFilter . '%';
-        $deliveryDaysFilterQueryParam = '%' . $r->deliveryDaysFilter . '%';
 
 
-        $ordersWithQuery = Order::where('id', 'like', $orderIdFilterQueryParam)
-            ->where('user_id', null)
-            // ->orWhere('user_id', 'like', $userIdFilterQueryParam)
-            ->where('stripe_payment_intent_id', 'like', $stripePaymentIntentIdFilterQueryParam)
+        $ordersWithQuery = Order::where('id', 'like', $orderIdFilterQueryParam);
 
+        if (trim($r->userIdFilter) != '') {
+            $ordersWithQuery = $ordersWithQuery->where('user_id', 'like', $userIdFilterQueryParam);
+        }
+
+        $ordersWithQuery = $ordersWithQuery->where('stripe_payment_intent_id', 'like', $stripePaymentIntentIdFilterQueryParam)
             ->where('first_name', 'like', $firstNameFilterQueryParam)
             ->where('last_name', 'like', $lastNameFilterQueryParam)
             ->where('phone', 'like', $phoneFilterQueryParam)
@@ -66,6 +65,7 @@ class OrderController extends Controller
 
             ->orderBy('created_at', 'desc');
 
+
         $totalNumOfProductsForQuery = $ordersWithQuery->count();
 
         $numOfOrdersToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE;
@@ -85,6 +85,7 @@ class OrderController extends Controller
                     'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery
                 ]
             ],
+            // BMD-DELETE
             'requestData' => [
                 'orderIdFilter' => $r->orderIdFilter,
                 'deliveryDaysFilter' => $r->deliveryDaysFilter,
