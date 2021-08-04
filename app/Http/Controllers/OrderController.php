@@ -9,10 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\Resources\OrderItemResource;
 
 class OrderController extends Controller
 {
     private const NUM_OF_DISPLAYED_ORDERS_PER_PAGE = 10;
+
+
 
     public function index(Request $r)
     {
@@ -98,4 +101,31 @@ class OrderController extends Controller
 
         return $ordersQuery;
     }
+
+
+
+    public function show(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
+
+        
+        $v = $r->validate([
+            'orderId' => 'required|string|size:36',
+        ]);
+
+
+        $o = Order::find($v['orderId']);
+
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'order' => new OrderResource($o),
+                'orderItems' => OrderItemResource::collection($o->orderItems)
+            ],
+            'r->orderId' => $r->orderId,
+            'v->orderId' => $v['orderId']
+        ];
+    }
+
 }
