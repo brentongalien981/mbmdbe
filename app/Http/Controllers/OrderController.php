@@ -19,6 +19,37 @@ class OrderController extends Controller
         Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
 
 
+        $ordersQuery = $this->getOrdersQuery($r);
+        $totalNumOfProductsForQuery = $ordersQuery->count();
+
+        $numOfOrdersToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE;
+
+        $orders = $ordersQuery->skip($numOfOrdersToSkip)
+            ->take(self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE)
+            ->get();
+
+        $orders = OrderResource::collection($orders);
+
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'orders' => $orders,
+                'paginationData' => [
+                    'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery
+                ]
+            ],
+            // BMD-FOR-DEBUG
+            'requestData' => [
+                'r->request' => GeneralHelper::jsonifyObj($r->request),
+            ]
+        ];
+    }
+
+
+
+    private function getOrdersQuery(Request $r)
+    {
         $orderIdFilterQueryParam = '%' . $r->orderIdFilter . '%';
         $userIdFilterQueryParam = '%' . $r->userIdFilter . '%';
         $stripePaymentIntentIdFilterQueryParam = '%' . $r->stripePaymentIntentIdFilter . '%';
@@ -37,13 +68,13 @@ class OrderController extends Controller
         $statusFilterQueryParam = '%' . $r->statusFilter . '%';
 
 
-        $ordersWithQuery = Order::where('id', 'like', $orderIdFilterQueryParam);
+        $ordersQuery = Order::where('id', 'like', $orderIdFilterQueryParam);
 
         if (trim($r->userIdFilter) != '') {
-            $ordersWithQuery = $ordersWithQuery->where('user_id', 'like', $userIdFilterQueryParam);
+            $ordersQuery = $ordersQuery->where('user_id', 'like', $userIdFilterQueryParam);
         }
 
-        $ordersWithQuery = $ordersWithQuery->where('stripe_payment_intent_id', 'like', $stripePaymentIntentIdFilterQueryParam)
+        $ordersQuery = $ordersQuery->where('stripe_payment_intent_id', 'like', $stripePaymentIntentIdFilterQueryParam)
             ->where('first_name', 'like', $firstNameFilterQueryParam)
             ->where('last_name', 'like', $lastNameFilterQueryParam)
             ->where('phone', 'like', $phoneFilterQueryParam)
@@ -65,33 +96,6 @@ class OrderController extends Controller
 
             ->orderBy('created_at', 'desc');
 
-
-        $totalNumOfProductsForQuery = $ordersWithQuery->count();
-
-        $numOfOrdersToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE;
-
-        $orders = $ordersWithQuery->skip($numOfOrdersToSkip)
-            ->take(self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE)
-            ->get();
-
-        $orders = OrderResource::collection($orders);
-
-
-        return [
-            'isResultOk' => true,
-            'objs' => [
-                'orders' => $orders,
-                'paginationData' => [
-                    'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery
-                ]
-            ],
-            // BMD-DELETE
-            'requestData' => [
-                'orderIdFilter' => $r->orderIdFilter,
-                'deliveryDaysFilter' => $r->deliveryDaysFilter,
-                'xxx' => GeneralHelper::jsonifyObj($r->request),
-                'ordersWithQuery' => $ordersWithQuery
-            ]
-        ];
+        return $ordersQuery;
     }
 }
