@@ -120,11 +120,9 @@ class OrderController extends Controller
         return [
             'isResultOk' => true,
             'objs' => [
-                'order' => new OrderResource($o),
-                'orderItems' => OrderItemResource::collection($o->orderItems)
-            ],
-            'r->orderId' => $r->orderId,
-            'v->orderId' => $v['orderId']
+                'order' => new OrderResource($o) ?? [],
+                'orderItems' => OrderItemResource::collection($o->orderItems) ?? []
+            ]
         ];
     }
 
