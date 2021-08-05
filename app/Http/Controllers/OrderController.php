@@ -123,6 +123,7 @@ class OrderController extends Controller
                 'order' => new OrderResource($o) ?? [],
                 'orderItems' => OrderItemResource::collection($o->orderItems) ?? []
             ]
+            //
         ];
     }
 
