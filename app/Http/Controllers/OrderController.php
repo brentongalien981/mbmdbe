@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Bmd\Generals\GeneralHelper;
 use Exception;
 use App\Models\Order;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
+use App\Bmd\Generals\GeneralHelper;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
@@ -121,9 +122,9 @@ class OrderController extends Controller
             'isResultOk' => true,
             'objs' => [
                 'order' => new OrderResource($o) ?? [],
-                'orderItems' => OrderItemResource::collection($o->orderItems) ?? []
+                'orderItems' => OrderItemResource::collection($o->orderItems) ?? [],
+                'orderStatuses' => OrderStatus::orderBy('name', 'asc')->get()
             ]
-            //
         ];
     }
 
