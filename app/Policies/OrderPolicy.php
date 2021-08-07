@@ -28,4 +28,11 @@ class OrderPolicy
 
         return false;
     }
+
+
+
+    public function manageUpdate(User $user)
+    {
+        return $this->viewAny($user);
+    }
 }

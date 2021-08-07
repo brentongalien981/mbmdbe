@@ -109,7 +109,7 @@ class OrderController extends Controller
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
 
-        
+
         $v = $r->validate([
             'orderId' => 'required|string|size:36',
         ]);
@@ -128,4 +128,80 @@ class OrderController extends Controller
         ];
     }
 
+
+
+    public function update(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('manageUpdate', Order::class);
+
+
+        $v = $r->validate([
+            'id' => 'required|string|size:36',
+            'user_id' => 'nullable|integer',
+            'cart_id' => 'required|integer',
+            'stripe_payment_intent_id' => 'string|max:64',
+            'status_code' => 'required|integer',
+            'first_name' => 'required|string|max:128',
+            'last_name' => 'required|string|max:128',
+            'street' => 'required|string|max:128',
+            'city' => 'required|string|max:64',
+            'province' => 'required|string|max:32',
+            'country' => 'required|string|max:32',
+            'postal_code' => 'required|string|max:16',
+            'phone' => 'required|string|max:16',
+            'email' => 'required|string|max:128',
+
+            'charged_subtotal' => 'required|numeric',
+            'charged_shipping_fee' => 'required|numeric',
+            'charged_tax' => 'required|numeric',
+            'projected_total_delivery_days' => 'required|integer|max:64',
+
+            'earliest_delivery_date' => 'required|date',
+            'latest_delivery_date' => 'required|date',
+            'created_at' => 'required|date',
+            'updated_at' => 'required|date'
+        ]);
+
+
+        $o = Order::find($v['id']);
+        $o->user_id = $v['user_id'] ?? null;
+        $o->cart_id = $v['cart_id'];
+        $o->stripe_payment_intent_id = $v['stripe_payment_intent_id'];
+        $o->status_code = $v['status_code'];
+        $o->first_name = $v['first_name'];
+        $o->last_name = $v['last_name'];
+        $o->street = $v['street'];
+        $o->city = $v['city'];
+        $o->province = $v['province'];
+        $o->country = $v['country'];
+        $o->postal_code = $v['postal_code'];
+        $o->phone = $v['phone'];
+        $o->email = $v['email'];
+        $o->charged_subtotal = $v['charged_subtotal'];
+        $o->charged_shipping_fee = $v['charged_shipping_fee'];
+        $o->charged_tax = $v['charged_tax'];
+        $o->projected_total_delivery_days = $v['projected_total_delivery_days'];
+        $o->earliest_delivery_date = $v['earliest_delivery_date'];
+        $o->latest_delivery_date = $v['latest_delivery_date'];
+        $o->created_at = $v['created_at'];
+        $o->save();
+
+
+        return [
+            'isResultOk' => true,
+            'objs' => [],
+            // // BMD-FOR-DEBUG
+            // 'requestData' => [
+            //     'r->request' => GeneralHelper::jsonifyObj($r->request),
+            //     'r->id' => $r->id,
+            //     'r->status_code' => $r->status_code
+            // ],
+            // 'resultData' => [
+            //     'v' => $v,
+            //     'o' => $o
+            // ]
+
+        ];
+    }
 }
+
