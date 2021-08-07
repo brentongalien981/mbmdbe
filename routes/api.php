@@ -61,6 +61,7 @@ Route::get('/daily-summary/readFinanceGraphData', [DailySummaryController::class
 Route::get('/orders', [OrderController::class, 'index'])->middleware('bmdauth');
 Route::get('/orders/show', [OrderController::class, 'show'])->middleware('bmdauth');
 Route::post('/orders/update', [OrderController::class, 'update'])->middleware('bmdauth');
+Route::get('/orders/create', [OrderController::class, 'create'])->middleware('bmdauth');
 
 
 

@@ -130,6 +130,20 @@ class OrderController extends Controller
 
 
 
+    public function create(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'order' => new OrderResource(Order::first())
+            ]
+        ];
+    }
+
+
+
     public function update(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('manageUpdate', Order::class);
