@@ -189,7 +189,6 @@ class OrderController extends Controller
 
         return [
             'isResultOk' => true,
-            'objs' => [],
             // // BMD-FOR-DEBUG
             // 'requestData' => [
             //     'r->request' => GeneralHelper::jsonifyObj($r->request),
