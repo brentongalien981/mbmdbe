@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\Order;
 use App\Models\OrderStatus;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Bmd\Generals\GeneralHelper;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\Resources\OrderItemResource;
+use App\Models\Cart;
 
 class OrderController extends Controller
 {
@@ -130,29 +132,13 @@ class OrderController extends Controller
 
 
 
-    public function create(Request $r)
+    private function validateRequestData(Request $r, $crudAction = 'create')
     {
-        Gate::forUser(BmdAuthProvider::user())->authorize('viewAny', Order::class);
+        $idValidationRule = ($crudAction === 'create' ? 'nullable|string|size:36' : 'required|string|size:36');
 
-        return [
-            'isResultOk' => true,
-            'objs' => [
-                'order' => new OrderResource(Order::first())
-            ]
-        ];
-    }
-
-
-
-    public function update(Request $r)
-    {
-        Gate::forUser(BmdAuthProvider::user())->authorize('manageUpdate', Order::class);
-
-
-        $v = $r->validate([
-            'id' => 'required|string|size:36',
+        return $r->validate([
+            'id' => $idValidationRule,
             'user_id' => 'nullable|integer',
-            'cart_id' => 'required|integer',
             'stripe_payment_intent_id' => 'string|max:64',
             'status_code' => 'required|integer',
             'first_name' => 'required|string|max:128',
@@ -171,34 +157,80 @@ class OrderController extends Controller
             'projected_total_delivery_days' => 'required|integer|max:64',
 
             'earliest_delivery_date' => 'required|date',
-            'latest_delivery_date' => 'required|date',
-            'created_at' => 'required|date',
-            'updated_at' => 'required|date'
+            'latest_delivery_date' => 'required|date'
         ]);
+    }
 
 
-        $o = Order::find($v['id']);
-        $o->user_id = $v['user_id'] ?? null;
-        $o->cart_id = $v['cart_id'];
-        $o->stripe_payment_intent_id = $v['stripe_payment_intent_id'];
-        $o->status_code = $v['status_code'];
-        $o->first_name = $v['first_name'];
-        $o->last_name = $v['last_name'];
-        $o->street = $v['street'];
-        $o->city = $v['city'];
-        $o->province = $v['province'];
-        $o->country = $v['country'];
-        $o->postal_code = $v['postal_code'];
-        $o->phone = $v['phone'];
-        $o->email = $v['email'];
-        $o->charged_subtotal = $v['charged_subtotal'];
-        $o->charged_shipping_fee = $v['charged_shipping_fee'];
-        $o->charged_tax = $v['charged_tax'];
-        $o->projected_total_delivery_days = $v['projected_total_delivery_days'];
-        $o->earliest_delivery_date = $v['earliest_delivery_date'];
-        $o->latest_delivery_date = $v['latest_delivery_date'];
-        $o->created_at = $v['created_at'];
+
+    private function saveOrderWithData($data, $crudAction = 'create')
+    {
+        $o = null;
+
+        if ($crudAction === 'create') {
+
+            $cart = new Cart();
+            $cart->user_id = $data['user_id'] ?? null;
+            $cart->stripe_payment_intent_id = $data['stripe_payment_intent_id'];
+            $cart->save();
+
+            $o = new Order();
+            $o->id = Str::uuid()->toString();
+            $o->cart_id = $cart->id;
+        } else {
+            $o = Order::find($data['id']);
+        }
+
+
+        $o->user_id = $data['user_id'] ?? null;
+        $o->stripe_payment_intent_id = $data['stripe_payment_intent_id'];
+        $o->status_code = $data['status_code'];
+        $o->first_name = $data['first_name'];
+        $o->last_name = $data['last_name'];
+        $o->street = $data['street'];
+        $o->city = $data['city'];
+        $o->province = $data['province'];
+        $o->country = $data['country'];
+        $o->postal_code = $data['postal_code'];
+        $o->phone = $data['phone'];
+        $o->email = $data['email'];
+        $o->charged_subtotal = $data['charged_subtotal'];
+        $o->charged_shipping_fee = $data['charged_shipping_fee'];
+        $o->charged_tax = $data['charged_tax'];
+        $o->projected_total_delivery_days = $data['projected_total_delivery_days'];
+        $o->earliest_delivery_date = $data['earliest_delivery_date'];
+        $o->latest_delivery_date = $data['latest_delivery_date'];
         $o->save();
+
+        return $o;
+    }
+
+
+
+    public function store(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class);
+
+        $v = $this->validateRequestData($r);
+        $o = $this->saveOrderWithData($v);
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'order' => $o
+            ]
+        ];
+    }
+
+
+
+    public function update(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class);
+
+
+        $v = $this->validateRequestData($r, 'update');
+        $o = $this->saveOrderWithData($v, 'update');
 
 
         return [
@@ -217,4 +249,3 @@ class OrderController extends Controller
         ];
     }
 }
-

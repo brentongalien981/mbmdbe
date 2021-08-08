@@ -31,7 +31,7 @@ class OrderPolicy
 
 
 
-    public function manageUpdate(User $user)
+    public function update(User $user)
     {
         return $this->viewAny($user);
     }
