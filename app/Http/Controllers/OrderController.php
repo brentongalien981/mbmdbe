@@ -13,6 +13,7 @@ use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\Resources\OrderItemResource;
 use App\Models\Cart;
+use App\Models\OrderItemStatus;
 
 class OrderController extends Controller
 {
@@ -125,7 +126,8 @@ class OrderController extends Controller
             'objs' => [
                 'order' => new OrderResource($o) ?? [],
                 'orderItems' => OrderItemResource::collection($o->orderItems) ?? [],
-                'orderStatuses' => OrderStatus::orderBy('name', 'asc')->get()
+                'orderStatuses' => OrderStatus::orderBy('name', 'asc')->get(),
+                'orderItemStatuses' => OrderItemStatus::orderBy('name', 'asc')->get()
             ]
         ];
     }
