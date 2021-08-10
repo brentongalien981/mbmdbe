@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use App\Policies\DailySummaryPolicy;
+use App\Policies\GeneralManagementPolicy;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -32,5 +34,9 @@ class AuthServiceProvider extends ServiceProvider
 
 
         Gate::define('view-dailySummary', [DailySummaryPolicy::class, 'view']);
+
+        Gate::define('update-as-manager', function (User $u) {
+            return GeneralManagementPolicy::canUpdate($u);
+        });
     }
 }

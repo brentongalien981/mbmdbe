@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DailySummaryController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -62,6 +63,11 @@ Route::get('/orders', [OrderController::class, 'index'])->middleware('bmdauth');
 Route::get('/orders/show', [OrderController::class, 'show'])->middleware('bmdauth');
 Route::post('/orders/update', [OrderController::class, 'update'])->middleware('bmdauth');
 Route::post('/orders/store', [OrderController::class, 'store'])->middleware('bmdauth');
+
+
+
+/** order-items */
+Route::post('/order-items/store', [OrderItemController::class, 'store'])->middleware('bmdauth'); // BMD-TODO: Change to 'post'
 
 
 
