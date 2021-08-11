@@ -16,7 +16,7 @@ class OrderItemController extends Controller
     
     public function store(Request $r)
     {
-        Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class); 
+        Gate::forUser(BmdAuthProvider::user())->authorize('store', Order::class); 
 
         $v = $this->validateRequestData($r, 'store');
 
@@ -32,37 +32,49 @@ class OrderItemController extends Controller
 
 
 
-    private function validateRequestData(Request $r, $crudAction = 'create')
+    public function update(Request $r)
     {
+        Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class); 
+
+        $v = $this->validateRequestData($r, 'update');
+
+        $savedOrderItem = $this->saveWithData($v, 'update');
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'savedOrderItem' => new OrderItemResource($savedOrderItem)
+            ]
+        ];
+    }
+
+
+
+    private function validateRequestData(Request $r, $crudAction = 'store')
+    {
+        $idValidationRule = ($crudAction === 'store' ? 'nullable' : 'required|integer');
+
         return $r->validate([
-            'id' => 'required|integer',
+            'id' => $idValidationRule,
             'orderId' => 'exists:orders,id',
             'productId' => 'exists:products,id',
             'productSellerId' => 'exists:product_seller,id',
             'sizeAvailabilityId' => 'exists:size_availabilities,id',
             'purchaseItemId' => 'nullable|exists:purchase_items,id',
             'status_code' => 'exists:order_item_status,code',
-            'quantity' => 'integer',
-            'price' => 'numeric'
+            'quantity' => 'required|integer',
+            'price' => 'required|numeric'
         ]);
     }
 
 
 
-    private function saveWithData($data, $crudAction = 'create')
+    private function saveWithData($data, $crudAction = 'store')
     {
         $oi = null;
 
-        if ($crudAction === 'create') {
-
-            // $cart = new Cart();
-            // $cart->user_id = $data['user_id'] ?? null;
-            // $cart->stripe_payment_intent_id = $data['stripe_payment_intent_id'];
-            // $cart->save();
-
-            // $o = new Order();
-            // $o->id = Str::uuid()->toString();
-            // $o->cart_id = $cart->id;
+        if ($crudAction === 'store') {
+            $oi = new OrderItem();
         } else {
             $oi = OrderItem::find($data['id']);
         }

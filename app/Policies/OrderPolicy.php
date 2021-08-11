@@ -35,4 +35,11 @@ class OrderPolicy
     {
         return $this->viewAny($user);
     }
+
+
+
+    public function store(User $user)
+    {
+        return $this->viewAny($user);
+    }
 }
