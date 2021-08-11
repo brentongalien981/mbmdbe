@@ -67,7 +67,7 @@ Route::post('/orders/store', [OrderController::class, 'store'])->middleware('bmd
 
 
 /** order-items */
-Route::post('/order-items/store', [OrderItemController::class, 'store'])->middleware('bmdauth'); // BMD-TODO: Change to 'post'
+Route::post('/order-items/store', [OrderItemController::class, 'store'])->middleware('bmdauth');
 
 
 

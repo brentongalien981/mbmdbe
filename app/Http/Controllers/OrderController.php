@@ -45,10 +45,6 @@ class OrderController extends Controller
                 'paginationData' => [
                     'totalNumOfProductsForQuery' => $totalNumOfProductsForQuery
                 ]
-            ],
-            // BMD-FOR-DEBUG
-            'requestData' => [
-                'r->request' => GeneralHelper::jsonifyObj($r->request),
             ]
         ];
     }
