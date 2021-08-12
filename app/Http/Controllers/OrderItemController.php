@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Bmd\Generals\GeneralHelper;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\BmdHelpers\OrderItemAndPurchaseItemAssociator;
 use App\Http\Resources\OrderItemResource;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -91,5 +92,28 @@ class OrderItemController extends Controller
         $oi->save();
 
         return $oi;
+    }
+
+    
+
+    public function associateToPurchases(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class); 
+
+        $v = $r->validate([
+            'orderId' => 'exists:orders,id'
+        ]);
+
+        $bmdHttpResponseCode = OrderItemAndPurchaseItemAssociator::associate(Order::find($v['orderId']));
+
+        $updatedOrder = Order::find($v['orderId']);
+
+        return [
+            'isResultOk' => true,
+            'resultCode' => $bmdHttpResponseCode,
+            'objs' => [
+                'orderItems' => OrderItemResource::collection($updatedOrder->orderItems)
+            ]
+        ];
     }
 }

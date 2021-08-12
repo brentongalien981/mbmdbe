@@ -191,4 +191,23 @@ class Purchase extends Model
 
         return null;
     }
+
+
+
+    public static function createWithData($d) {
+
+        $toBePurchasedStatusCode = PurchaseStatus::where('name', PurchaseStatus::NAME_FOR_STATUS_TO_BE_PURCHASED)->get()[0]->code;
+
+        $p = new self;
+        $p->seller_id = $d['seller_id'];
+        $p->status_code = $d['status_code'] ?? $toBePurchasedStatusCode;
+
+        if ($d['created_at']) {
+            $p->created_at = $d['created_at'];
+        }
+
+        $p->save(); 
+
+        return $p;
+    }
 }

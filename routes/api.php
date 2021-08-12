@@ -69,6 +69,7 @@ Route::post('/orders/store', [OrderController::class, 'store'])->middleware('bmd
 /** order-items */
 Route::post('/order-items/store', [OrderItemController::class, 'store'])->middleware('bmdauth');
 Route::post('/order-items/update', [OrderItemController::class, 'update'])->middleware('bmdauth');
+Route::post('/order-items/associateToPurchases', [OrderItemController::class, 'associateToPurchases'])->middleware('bmdauth');
 
 
 

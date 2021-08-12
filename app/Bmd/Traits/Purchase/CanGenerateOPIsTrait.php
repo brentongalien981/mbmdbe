@@ -154,9 +154,9 @@ trait CanGenerateOPIsTrait
 
 
 
-    public static function getPurchaseWithSellerIdForDate($sellerId, $nextDate)
+    public static function getPurchaseWithSellerIdForDate($sellerId, $dateStr)
     {
-        $purchases = self::getPurchasesForDate($nextDate);
+        $purchases = self::getPurchasesForDate($dateStr);
 
         foreach ($purchases as $p) {
             if ($p->seller_id == $sellerId) {
@@ -191,10 +191,10 @@ trait CanGenerateOPIsTrait
 
 
 
-    public static function getPurchasesForDate($date)
+    public static function getPurchasesForDate($dateStr)
     {
-        $startDate = $date;
-        $endDate = $date . ' 23:59:59';
+        $startDate = $dateStr;
+        $endDate = $dateStr . ' 23:59:59';
 
 
         $purchases = self::where('created_at', '>=', $startDate)
@@ -265,6 +265,21 @@ trait CanGenerateOPIsTrait
         $todaysPurchases = self::getTodaysPurchases();
 
         foreach ($todaysPurchases as $p) {
+            if ($p->seller_id == $seller->id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+
+    public static function isTherePurchaseRecordWithSellerForDate($seller, $dateStr)
+    {
+        $purchasesForDateStr = self::getPurchasesForDate($dateStr);
+
+        foreach ($purchasesForDateStr as $p) {
             if ($p->seller_id == $seller->id) {
                 return true;
             }
