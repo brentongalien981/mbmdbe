@@ -92,8 +92,9 @@ class Order extends Model
         $numOfOrderItemsWithToBePurchasedStatus = 0;
 
 
+        $toBePurchasedStatus = OrderItemStatus::where('name', OrderItemStatus::NAME_FOR_STATUS_TO_BE_PURCHASED)->get()[0];
+        
         foreach ($orderItems as $oi) {
-            $toBePurchasedStatus = OrderItemStatus::where('name', OrderItemStatus::NAME_FOR_STATUS_TO_BE_PURCHASED)->get()[0];
             if ($oi->status_code == $toBePurchasedStatus->code) {
                 ++$numOfOrderItemsWithToBePurchasedStatus;
             }

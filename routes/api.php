@@ -63,6 +63,7 @@ Route::get('/orders', [OrderController::class, 'index'])->middleware('bmdauth');
 Route::get('/orders/show', [OrderController::class, 'show'])->middleware('bmdauth');
 Route::post('/orders/update', [OrderController::class, 'update'])->middleware('bmdauth');
 Route::post('/orders/store', [OrderController::class, 'store'])->middleware('bmdauth');
+Route::post('/orders/refresh', [OrderController::class, 'refresh'])->middleware('bmdauth');
 
 
 

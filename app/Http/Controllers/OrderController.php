@@ -205,6 +205,28 @@ class OrderController extends Controller
 
 
 
+    public function refresh(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class);
+
+        $v = $r->validate([
+            'orderId' => 'required|exists:orders,id',
+        ]);
+
+
+        $o = Order::find($v['orderId']);
+        $o->updateStatusBasedOnOrderItemsStatuses();
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'order' => new OrderResource($o)
+            ]
+        ];
+    }
+
+
+
     public function store(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('update', Order::class);
