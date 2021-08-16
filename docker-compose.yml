@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  test-mbmdbe-bitnami:
+    tty: true
+    image: docker.io/bitnami/laravel:8
+    ports:
+      - 3051:3000
+    volumes:
+      - ./:/app
+    privileged: true # Privileged mode could be required to run this container under Windows
