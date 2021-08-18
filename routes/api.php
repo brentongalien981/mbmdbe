@@ -7,6 +7,7 @@ use App\Http\Controllers\DailySummaryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\OrderStatusController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ScheduledTaskController;
@@ -76,6 +77,10 @@ Route::post('/order-items/associateToPurchases', [OrderItemController::class, 'a
 
 /** order-statuses */
 Route::get('/order-statuses', [OrderStatusController::class, 'index'])->middleware('bmdauth');
+
+
+/** purchases */
+Route::get('/purchases', [PurchaseController::class, 'index'])->middleware('bmdauth');
 
 
 
