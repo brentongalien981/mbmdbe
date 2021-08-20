@@ -8,6 +8,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ScheduledTaskController;
@@ -81,6 +82,11 @@ Route::get('/order-statuses', [OrderStatusController::class, 'index'])->middlewa
 
 /** purchases */
 Route::get('/purchases', [PurchaseController::class, 'index'])->middleware('bmdauth');
+
+
+
+/** purchase-statuses */
+Route::get('/purchase-statuses', [PurchaseStatusController::class, 'index'])->middleware('bmdauth');
 
 
 

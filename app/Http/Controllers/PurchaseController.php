@@ -23,7 +23,7 @@ class PurchaseController extends Controller
         $purchasesQuery = $this->getPurchasesQuery($r);
         $totalNumOfPurchasesForQuery = $purchasesQuery->count();
 
-        // BMD-TODO
+        // BMD-TODO:
         // $numOfPurchasesToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE;
         $numOfPurchasesToSkip = 0;
 
@@ -92,6 +92,7 @@ class PurchaseController extends Controller
         if (trim($r->notes) != '') {
             $purchasesQuery = $purchasesQuery->where('notes', 'like', $notesQueryPhrase);
         }
+
 
         $purchasesQuery = $purchasesQuery
             ->where('estimated_delivery_date', '>=', $r->estimatedDeliveryDate)
