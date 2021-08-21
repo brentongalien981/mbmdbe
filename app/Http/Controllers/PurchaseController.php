@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\Resources\PurchaseResource;
 use App\Models\Purchase;
+use Exception;
 
 class PurchaseController extends Controller
 {
@@ -93,8 +94,8 @@ class PurchaseController extends Controller
 
 
         $purchasesQuery = $purchasesQuery
-            ->where('estimated_delivery_date', '>=', $r->estimatedDeliveryDate)
-            ->orWhere('estimated_delivery_date', null)
+            // ->where('estimated_delivery_date', '>=', $r->estimatedDeliveryDate)
+            // ->orWhere('estimated_delivery_date', null)
             ->where('created_at', '>=', $r->createdAt)
             ->where('updated_at', '>=', $r->updatedAt)
 
