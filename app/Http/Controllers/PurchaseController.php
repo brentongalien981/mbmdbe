@@ -22,10 +22,8 @@ class PurchaseController extends Controller
 
         $purchasesQuery = $this->getPurchasesQuery($r);
         $totalNumOfPurchasesForQuery = $purchasesQuery->count();
-
-        // BMD-TODO:
-        // $numOfPurchasesToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_ORDERS_PER_PAGE;
-        $numOfPurchasesToSkip = 0;
+        
+        $numOfPurchasesToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_PURCHASES_PER_PAGE;
 
         $purchases = $purchasesQuery->skip($numOfPurchasesToSkip)
             ->take(self::NUM_OF_DISPLAYED_PURCHASES_PER_PAGE)
