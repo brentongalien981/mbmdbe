@@ -32,7 +32,7 @@ class PurchaseController extends Controller
 
         $purchases = PurchaseResource::collection($purchases);
 
-
+        
         return [
             'isResultOk' => true,
             'objs' => [
@@ -40,10 +40,6 @@ class PurchaseController extends Controller
                 'paginationData' => [
                     'totalNumOfPurchasesForQuery' => $totalNumOfPurchasesForQuery
                 ]
-            ],
-            // BMD-DELETE
-            'requestData' => [
-                'r->request' => GeneralHelper::jsonifyObj($r->request)
             ]
         ];
     }
