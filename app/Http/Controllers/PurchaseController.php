@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\Resources\PurchaseResource;
 use App\Models\Purchase;
+use App\Models\PurchaseItemStatus;
+use App\Models\PurchaseStatus;
 use Exception;
 
 class PurchaseController extends Controller
@@ -98,5 +100,30 @@ class PurchaseController extends Controller
             ->orderBy('created_at', 'desc');
 
         return $purchasesQuery;
+    }
+
+
+
+    public function show(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
+
+
+        $v = $r->validate([
+            'purchaseId' => 'required|integer',
+        ]);
+
+
+        $p = Purchase::find($v['purchaseId']);
+
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'purchase' => new PurchaseResource($p) ?? [],
+                'purchaseStatuses' => PurchaseStatus::orderBy('name', 'asc')->get(),
+                'purchaseItemStatuses' => PurchaseItemStatus::orderBy('name', 'asc')->get()
+            ]
+        ];
     }
 }
