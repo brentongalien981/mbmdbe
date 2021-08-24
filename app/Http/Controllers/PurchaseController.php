@@ -92,8 +92,6 @@ class PurchaseController extends Controller
 
 
         $purchasesQuery = $purchasesQuery
-            // ->where('estimated_delivery_date', '>=', $r->estimatedDeliveryDate)
-            // ->orWhere('estimated_delivery_date', null)
             ->where('created_at', '>=', $r->createdAt)
             ->where('updated_at', '>=', $r->updatedAt)
 
