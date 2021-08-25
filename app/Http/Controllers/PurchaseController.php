@@ -124,4 +124,49 @@ class PurchaseController extends Controller
             ]
         ];
     }
+
+
+
+    
+    public function store(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
+
+        // BMD-TODO
+        $v = $this->validateRequestData($r, 'create');
+        $p = Purchase::saveWithData($v, 'create');
+        
+
+        return [
+            'isResultOk' => true,
+            'objs' => [
+                'purchase' => new PurchaseResource($p)
+            ]
+        ];
+    }
+
+
+
+    private function validateRequestData(Request $r, $crudAction = 'create')
+    {
+        $idValidationRule = ($crudAction === 'create' ? 'nullable|integer' : 'required|integer');
+
+        return $r->validate([
+            'id' => $idValidationRule,
+            'sellerId' => 'required|integer|exists:sellers,id',
+            'projectedSubtotal' => 'nullable|numeric',
+            'projectedShippingFee' => 'nullable|numeric',
+            'projectedOtherFee' => 'nullable|numeric',
+            'projectedTax' => 'nullable|numeric',
+            'chargedSubtotal' => 'nullable|numeric',
+            'chargedShippingFee' => 'nullable|numeric',
+            'chargedOtherFee' => 'nullable|numeric',
+            'chargedTax' => 'nullable|numeric',
+            'statusCode' => 'required|integer',
+            'estimatedDeliveryDate' => 'nullable|date',
+            'orderIdFromSellerSite' => 'nullable|string|max:128',
+            'shippingIdFromCarrier' => 'nullable|string|max:128',
+            'notes' => 'nullable|string|max:1024'
+        ]);
+    }
 }

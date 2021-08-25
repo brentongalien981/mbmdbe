@@ -210,4 +210,38 @@ class Purchase extends Model
 
         return $p;
     }
+
+
+
+    public static function saveWithData($data, $crudAction = 'create')
+    {
+        $obj = null;
+        $d = $data;
+
+        if ($crudAction === 'create') {
+            $obj = new self;
+        } else {
+            $obj = self::find($data['id']);
+        }
+
+
+        $obj->seller_id = $d['sellerId'];
+        $obj->projected_subtotal = $d['projectedSubtotal'] ?? null;
+        $obj->projected_shipping_fee = $d['projectedShippingFee'] ?? null;
+        $obj->projected_other_fee = $d['projectedOtherFee'] ?? null;
+        $obj->projected_tax = $d['projectedTax'] ?? null;
+        $obj->charged_subtotal = $d['chargedSubtotal'] ?? null;
+        $obj->charged_shipping_fee = $d['chargedShippingFee'] ?? null;
+        $obj->charged_other_fee = $d['chargedOtherFee'] ?? null;
+        $obj->charged_tax = $d['chargedTax'] ?? null;
+        $obj->status_code = $d['statusCode'];
+        $obj->estimated_delivery_date = $d['estimatedDeliveryDate'] ?? null;
+        $obj->order_id_from_seller_site = $d['orderIdFromSellerSite'] ?? null;
+        $obj->shipping_id_from_carrier = $d['shippingIdFromCarrier'] ?? null;
+        $obj->notes = $d['notes'] ?? null;
+        $obj->save();
+
+
+        return $obj;
+    }
 }

@@ -83,6 +83,7 @@ Route::get('/order-statuses', [OrderStatusController::class, 'index'])->middlewa
 /** purchases */
 Route::get('/purchases', [PurchaseController::class, 'index'])->middleware('bmdauth');
 Route::get('/purchases/show', [PurchaseController::class, 'show'])->middleware('bmdauth');
+Route::post('/purchases/store', [PurchaseController::class, 'store'])->middleware('bmdauth');
 
 
 
