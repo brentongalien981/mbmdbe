@@ -169,4 +169,21 @@ class PurchaseController extends Controller
             'notes' => 'nullable|string|max:1024'
         ]);
     }
+
+
+
+    public function update(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
+
+
+        // BMD-TODO
+        // $v = $this->validateRequestData($r, 'update');
+        // $o = $this->saveOrderWithData($v, 'update');
+
+
+        return [
+            'isResultOk' => true
+        ];
+    }
 }
