@@ -132,7 +132,7 @@ class PurchaseController extends Controller
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
 
-        // BMD-TODO
+        
         $v = $this->validateRequestData($r, 'create');
         $p = Purchase::saveWithData($v, 'create');
         
