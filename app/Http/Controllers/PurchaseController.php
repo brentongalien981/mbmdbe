@@ -6,10 +6,12 @@ use App\Bmd\Generals\GeneralHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\BmdHttpResponseCodes\PurchaseHttpResponseCodes;
 use App\Http\Resources\PurchaseResource;
 use App\Models\Purchase;
 use App\Models\PurchaseItemStatus;
 use App\Models\PurchaseStatus;
+use App\Rules\PurchaseSellerIdEqualsItsPurchaseItemSellerIds;
 use Exception;
 
 class PurchaseController extends Controller
@@ -25,7 +27,7 @@ class PurchaseController extends Controller
 
         $purchasesQuery = $this->getPurchasesQuery($r);
         $totalNumOfPurchasesForQuery = $purchasesQuery->count();
-        
+
         $numOfPurchasesToSkip = ($r->pageNum - 1) * self::NUM_OF_DISPLAYED_PURCHASES_PER_PAGE;
 
         $purchases = $purchasesQuery->skip($numOfPurchasesToSkip)
@@ -34,7 +36,7 @@ class PurchaseController extends Controller
 
         $purchases = PurchaseResource::collection($purchases);
 
-        
+
         return [
             'isResultOk' => true,
             'objs' => [
@@ -127,15 +129,15 @@ class PurchaseController extends Controller
 
 
 
-    
+
     public function store(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
 
-        
+
         $v = $this->validateRequestData($r, 'create');
         $p = Purchase::saveWithData($v, 'create');
-        
+
 
         return [
             'isResultOk' => true,
@@ -149,7 +151,11 @@ class PurchaseController extends Controller
 
     private function validateRequestData(Request $r, $crudAction = 'create')
     {
-        $idValidationRule = ($crudAction === 'create' ? 'nullable|integer' : 'required|integer');
+        $idValidationRule = 'nullable|integer';
+
+        if ($crudAction === 'update') {
+            $idValidationRule = 'required|integer';
+        }
 
         return $r->validate([
             'id' => $idValidationRule,
@@ -178,12 +184,34 @@ class PurchaseController extends Controller
 
 
         // BMD-TODO
-        // $v = $this->validateRequestData($r, 'update');
-        // $o = $this->saveOrderWithData($v, 'update');
+        $isResultOk = true;
+        $resultCode = null;
+
+
+        $v = $this->validateRequestData($r, 'update');
+
+        $extraValidationData = [
+            'purchaseId' => $v['id'],
+            'newSellerId' => $v['sellerId']
+        ];
+
+        $p = null;
+
+        if (PurchaseSellerIdEqualsItsPurchaseItemSellerIds::bmdValidate($extraValidationData)) {
+            $p = Purchase::saveWithData($v, 'update');
+            $p = new PurchaseResource($p);
+        } else {
+            $isResultOk = false;
+            $resultCode = PurchaseHttpResponseCodes::PURCHASE_SELLER_SHOULD_EQUAL_PURCHASE_ITEMS_SELLERS;
+        }
 
 
         return [
-            'isResultOk' => true
+            'isResultOk' => $isResultOk,
+            'resultCode' => $resultCode,
+            'objs' => [
+                'purchase' => $p
+            ]
         ];
     }
 }
