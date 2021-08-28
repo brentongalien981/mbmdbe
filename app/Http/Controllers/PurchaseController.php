@@ -186,6 +186,7 @@ class PurchaseController extends Controller
         // BMD-TODO
         $isResultOk = true;
         $resultCode = null;
+        $p = null;
 
 
         $v = $this->validateRequestData($r, 'update');
@@ -193,9 +194,7 @@ class PurchaseController extends Controller
         $extraValidationData = [
             'purchaseId' => $v['id'],
             'newSellerId' => $v['sellerId']
-        ];
-
-        $p = null;
+        ];        
 
         if (PurchaseSellerIdEqualsItsPurchaseItemSellerIds::bmdValidate($extraValidationData)) {
             $p = Purchase::saveWithData($v, 'update');
