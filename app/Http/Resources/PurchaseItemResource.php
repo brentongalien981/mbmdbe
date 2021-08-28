@@ -21,7 +21,7 @@ class PurchaseItemResource extends JsonResource
             'sellerProductId' => $this->seller_product_id,
             'sizeAvailabilityId' => $this->size_availability_id,    
             'quantity' => $this->quantity,
-            'projectedPrice' => $this->projectedPrice,
+            'projectedPrice' => $this->projected_price,
             'actualPrice' => $this->actual_price,            
 
             'statusCode' => $this->status_code,
