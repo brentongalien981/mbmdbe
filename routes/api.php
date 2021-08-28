@@ -8,6 +8,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\OrderStatusController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\PurchaseItemController;
 use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -85,6 +86,11 @@ Route::get('/purchases', [PurchaseController::class, 'index'])->middleware('bmda
 Route::get('/purchases/show', [PurchaseController::class, 'show'])->middleware('bmdauth');
 Route::post('/purchases/store', [PurchaseController::class, 'store'])->middleware('bmdauth');
 Route::post('/purchases/update', [PurchaseController::class, 'update'])->middleware('bmdauth');
+
+
+
+/** purchase-items */
+Route::post('/purchase-items/store', [PurchaseItemController::class, 'store'])->middleware('bmdauth');
 
 
 
