@@ -48,50 +48,30 @@ class PurchaseItemController extends Controller
         }
 
 
-        if ($isResultOk) {
+        $savedPurchaseItem = null;
 
-            // Db transaction
+
+        if ($isResultOk) {
+            
             DB::beginTransaction();
 
-
-            // Save purchase-item.
             $savedPurchaseItem = PurchaseItem::saveWithData($v, 'store');
 
-
-            // BMD-DELETE
-            $oldOrderItems = OrderItem::where('purchase_item_id', $savedPurchaseItem->id)->get();
-
-
-            // Update referenced order-items.
             $savedPurchaseItem->updateStatusOfRelatedOrderItems();
 
+            $savedPurchaseItem->updateStatsOfRelatedInventoryItem();
 
-
-            // BMD-DELETE
-            $updatedOrderItems = OrderItem::where('purchase_item_id', $savedPurchaseItem->id)->get();
-            $oldIi = InventoryItem::where('size_availability_id', $savedPurchaseItem->size_availability_id)->get()[0];
-
-
-            // Update relevant inventory-items.
-            $updatedIi = $savedPurchaseItem->updateStatsOfRelatedInventoryItem();
-
-
-            // Commit db-transaction.
             DB::commit();
-        }
 
+            $savedPurchaseItem = $savedPurchaseItem ? new PurchaseItemResource($savedPurchaseItem) : null;
+        }        
 
 
         return [
             'isResultOk' => $isResultOk,
             'resultCode' => $resultCode,
             'objs' => [
-                'savedPurchaseItem' => new PurchaseItemResource($savedPurchaseItem),
-                // BMD-DELETE
-                'oldOrderItems' => $oldOrderItems,
-                'updatedOrderItems' => $updatedOrderItems,
-                'oldIi' => $oldIi,
-                'updatedIi' => $updatedIi
+                'savedPurchaseItem' => $savedPurchaseItem
             ]
         ];
     }
@@ -104,7 +84,7 @@ class PurchaseItemController extends Controller
 
         return $r->validate([
             'id' => $idValidationRule,
-            'purchaseId' => 'required|exists:purchase,id',
+            'purchaseId' => 'required|exists:purchases,id',
             'sellerProductId' => 'required|exists:product_seller,id',
             'sizeAvailabilityId' => 'required|exists:size_availabilities,id',
             'quantity' => 'required|integer|min:1',

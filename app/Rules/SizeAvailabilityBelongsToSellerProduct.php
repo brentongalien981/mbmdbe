@@ -15,7 +15,7 @@ class SizeAvailabilityBelongsToSellerProduct implements Rule
         $sellerProduct = ProductSeller::find($d['sellerProductId']);
         $sizeAvailability = SizeAvailability::find($d['sizeAvailabilityId']);
 
-        if ($sizeAvailability->seller__product_id === $sellerProduct->id) {
+        if ($sizeAvailability->seller_product_id === $sellerProduct->id) {
             return true;
         }
 
