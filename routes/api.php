@@ -91,6 +91,7 @@ Route::post('/purchases/update', [PurchaseController::class, 'update'])->middlew
 
 /** purchase-items */
 Route::post('/purchase-items/store', [PurchaseItemController::class, 'store'])->middleware('bmdauth');
+Route::post('/purchase-items/update', [PurchaseItemController::class, 'update'])->middleware('bmdauth');
 
 
 

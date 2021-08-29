@@ -19,11 +19,16 @@ use App\Http\BmdHttpResponseCodes\PurchaseItemHttpResponseCodes;
 
 class PurchaseItemController extends Controller
 {
-    public function store(Request $r)
+    public function store(Request $r) { return $this->save($r, 'store'); }
+    public function update(Request $r) { return $this->save($r, 'update'); }
+
+
+
+    public function save(Request $r, $crudAction)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
 
-        $v = $this->validateRequestData($r, 'store');
+        $v = $this->validateRequestData($r, $crudAction);
 
         $isResultOk = true;
         $resultCode = null;
@@ -31,7 +36,8 @@ class PurchaseItemController extends Controller
         $extraValidationData = [
             'purchaseId' => $v['purchaseId'],
             'sellerProductId' => $v['sellerProductId'],
-            'sizeAvailabilityId' => $v['sizeAvailabilityId']
+            'sizeAvailabilityId' => $v['sizeAvailabilityId'],
+            'purchaseItemId' => $v['id'] ?? null
         ];
 
 
@@ -55,18 +61,25 @@ class PurchaseItemController extends Controller
         }
 
 
-        $savedPurchaseItem = null;
+
+        $savedPurchaseItem = null;        
+        $oldPurchaseItemStatusCode = null;
+
+        if ($crudAction == 'update') {
+            $oldPurchaseItemStatusCode = PurchaseItem::find($v['id'])->status_code;
+        }
+
 
 
         if ($isResultOk) {
             
             DB::beginTransaction();
 
-            $savedPurchaseItem = PurchaseItem::saveWithData($v, 'store');
+            $savedPurchaseItem = PurchaseItem::saveWithData($v, $crudAction);
 
             $savedPurchaseItem->updateStatusOfRelatedOrderItems();
 
-            $savedPurchaseItem->updateStatsOfRelatedInventoryItem();
+            $savedPurchaseItem->updateStatsOfRelatedInventoryItem($crudAction, $oldPurchaseItemStatusCode);
 
             DB::commit();
 

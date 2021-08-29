@@ -51,13 +51,26 @@ class PurchaseItem extends Model
 
 
 
-    public function updateStatsOfRelatedInventoryItem()
+    public function updateStatsOfRelatedInventoryItem($crudAction, $oldPurchaseItemStatusCode)
     {
         $ii = InventoryItem::where('size_availability_id', $this->size_availability_id)->get()[0];
-        $status = PurchaseItemStatus::where('code', $this->status_code)->get()[0];
-        $iiStatColumnToIncrease = InventoryItem::mapStatusNameToStatColumnName($status->name);
 
+
+        if ($crudAction == 'update') {
+
+            $oldStatus = PurchaseItemStatus::where('code', $oldPurchaseItemStatusCode)->get()[0];
+
+            $iiStatColumnToDecrease = InventoryItem::mapStatusNameToStatColumnName($oldStatus->name);
+            $ii->$iiStatColumnToDecrease = $ii->$iiStatColumnToDecrease - $this->quantity;
+        }
+
+
+        $newStatus = PurchaseItemStatus::where('code', $this->status_code)->get()[0];
+
+        $iiStatColumnToIncrease = InventoryItem::mapStatusNameToStatColumnName($newStatus->name);
         $ii->$iiStatColumnToIncrease = $ii->$iiStatColumnToIncrease + $this->quantity;
+
+
         $ii->save();
 
         return $ii;
