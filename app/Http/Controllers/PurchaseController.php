@@ -183,7 +183,6 @@ class PurchaseController extends Controller
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Purchase::class);
 
 
-        // BMD-TODO
         $isResultOk = true;
         $resultCode = null;
         $p = null;
