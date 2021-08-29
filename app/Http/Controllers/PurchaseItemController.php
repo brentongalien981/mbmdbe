@@ -10,10 +10,12 @@ use App\Models\InventoryItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\Resources\PurchaseItemResource;
+use App\Rules\UniqueSizeAvailabilityForPurchase;
 use App\Rules\SizeAvailabilityBelongsToSellerProduct;
 use App\Rules\PurchaseItemSellerIdEqualsPurchaseSellerId;
+use App\Http\BmdHttpResponseCodes\PurchaseHttpResponseCodes;
 use App\Http\BmdHttpResponseCodes\PurchaseItemHttpResponseCodes;
-use App\Http\Resources\PurchaseItemResource;
 
 class PurchaseItemController extends Controller
 {
@@ -36,6 +38,11 @@ class PurchaseItemController extends Controller
         try {
             if (!PurchaseItemSellerIdEqualsPurchaseSellerId::bmdValidate($extraValidationData)) {
                 $resultCode = PurchaseItemHttpResponseCodes::PURCHASE_ITEM_SELLER_SHOULD_EQUAL_PURCHASE_SELLER;
+                throw new Exception();
+            }
+
+            if (!UniqueSizeAvailabilityForPurchase::bmdValidate($extraValidationData)) {
+                $resultCode = PurchaseHttpResponseCodes::PURCHASE_SHOULD_HAVE_UNIQUE_SIZE_AVAILABILITIES;
                 throw new Exception();
             }
 
