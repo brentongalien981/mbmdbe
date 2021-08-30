@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\PurchaseStatus;
+use App\Models\Seller;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class PurchaseResource extends JsonResource
@@ -15,6 +16,9 @@ class PurchaseResource extends JsonResource
      */
     public function toArray($request)
     {
+        $seller = Seller::find($this->seller_id);
+
+
         return [
             'id' => $this->id,
             'sellerId' => $this->seller_id,
@@ -38,7 +42,11 @@ class PurchaseResource extends JsonResource
             'createdAt' => $this->created_at,
             'updatedAt' => $this->updated_at,
 
-            'purchaseItems' => PurchaseItemResource::collection($this->purchaseItems)
+            'purchaseItems' => PurchaseItemResource::collection($this->purchaseItems),
+
+            // Extras
+            'sellerLink' => $seller->website ?? null,
+            'sellerName' => $seller->name ?? null
         ];
     }
 }
