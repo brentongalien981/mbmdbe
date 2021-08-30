@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\Product;
 use App\Models\OrderItemStatus;
 use App\Models\ProductSeller;
+use App\Models\SizeAvailability;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderItemResource extends JsonResource
@@ -36,7 +37,8 @@ class OrderItemResource extends JsonResource
 
             // Extras
             'productName' => Product::find($this->product_id)->name ?? '',
-            'sellerProductLink' => ProductSeller::find($this->product_seller_id)->link ?? null
+            'sellerProductLink' => ProductSeller::find($this->product_seller_id)->link ?? null,
+            'size' => SizeAvailability::find($this->size_availability_id)->size ?? null
         ];
     }
 }
