@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Product;
 use App\Models\OrderItemStatus;
+use App\Models\ProductSeller;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class OrderItemResource extends JsonResource
@@ -34,7 +35,8 @@ class OrderItemResource extends JsonResource
             'updated_at' => $this->updated_at,
 
             // Extras
-            'productName' => Product::find($this->product_id)->name ?? ''
+            'productName' => Product::find($this->product_id)->name ?? '',
+            'sellerProductLink' => ProductSeller::find($this->product_seller_id)->link ?? null
         ];
     }
 }
