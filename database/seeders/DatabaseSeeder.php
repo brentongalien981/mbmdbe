@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             OrderItemStatusSeeder::class,
             PurchaseStatusSeeder::class,
             PurchaseItemStatusSeeder::class,
-            InventoryItemStatusSeeder::class
+            InventoryItemStatusSeeder::class,
+            DispatchStatusSeeder::class
         ]);
     }
 }
