@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\DispatchStatus;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use Exception;
 
 class DispatchController extends Controller
 {
@@ -28,7 +29,7 @@ class DispatchController extends Controller
         $dispatch->status_code = DispatchStatus::where('name', 'EP_BATCH_CREATING')->get()[0]->code;
         $dispatch->save();
 
-
+        
         return [
             'isResultOk' => true,
             'objs' => [
