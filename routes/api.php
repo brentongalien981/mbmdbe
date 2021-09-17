@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DailySummaryController;
 use App\Http\Controllers\DispatchController;
+use App\Http\Controllers\DispatchStatusController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\OrderStatusController;
@@ -103,6 +104,11 @@ Route::get('/purchase-statuses', [PurchaseStatusController::class, 'index'])->mi
 
 /** dispatches */
 Route::post('/dispatches/store', [DispatchController::class, 'store'])->middleware('bmdauth');
+
+
+
+/** dispatch-statuses */
+Route::get('/dispatch-statuses', [DispatchStatusController::class, 'index'])->middleware('bmdauth');
 
 
 
