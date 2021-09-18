@@ -103,6 +103,7 @@ Route::get('/purchase-statuses', [PurchaseStatusController::class, 'index'])->mi
 
 
 /** dispatches */
+Route::get('/dispatches', [DispatchController::class, 'index'])->middleware('bmdauth');
 Route::post('/dispatches/store', [DispatchController::class, 'store'])->middleware('bmdauth');
 
 
