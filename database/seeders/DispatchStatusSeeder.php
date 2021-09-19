@@ -26,5 +26,7 @@ class DispatchStatusSeeder extends Seeder
         DB::table('dispatch_statuses')->insert(['code' => 506, 'name' => 'DISPATCHING']);
         DB::table('dispatch_statuses')->insert(['code' => 507, 'name' => 'DISPATCHED']);
         DB::table('dispatch_statuses')->insert(['code' => 508, 'name' => 'CANCELLED']);
+
+        DB::table('dispatch_statuses')->insert(['code' => 509, 'name' => 'EP_PICKUP_BOUGHT']);
     }
 }
