@@ -41,6 +41,9 @@ class OrderItemController extends Controller
 
         $savedOrderItem = $this->saveWithData($v, 'update');
 
+        // BMD-TODO: Update inventory-item.
+        
+
         return [
             'isResultOk' => true,
             'objs' => [
