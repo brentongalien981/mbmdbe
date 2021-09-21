@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Http\BmdHelpers\OPIStatusToInventoryItemStatNameMapper;
 
 class InventoryItem extends Model
 {
@@ -52,5 +53,31 @@ class InventoryItem extends Model
         }
 
         return $iiColumnName;
+    }
+
+
+
+    public static function updateStatsWithReferenceObj($refObj, $oldStatusCode)
+    {
+        // Get the ref-obj-type: order, purhcase, other.
+        $refObjClass = get_class($refObj);
+        $inventoryItem = self::where('size_availability_id', $refObj->size_availability_id)->get()[0];
+
+
+        // Update inventory-item-stat-column to decrement.
+        $inventoryItemColumnToDecrement = OPIStatusToInventoryItemStatNameMapper::map($refObjClass, $oldStatusCode);
+        $decrementedQuantity = $inventoryItem->$inventoryItemColumnToDecrement - $refObj->quantity;
+        if ($decrementedQuantity >= 0) {
+            $inventoryItem->$inventoryItemColumnToDecrement -= $refObj->quantity;
+        }
+
+
+        // Update inventory-item-stat-column to increment.
+        $inventoryItemColumnToIncrement = OPIStatusToInventoryItemStatNameMapper::map($refObjClass, $refObj->status_code);
+        $inventoryItem->$inventoryItemColumnToIncrement += $refObj->quantity;
+
+
+        $inventoryItem->save();
+        return $inventoryItem;
     }
 }

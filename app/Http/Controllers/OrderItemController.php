@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\BmdHelpers\OrderItemAndPurchaseItemAssociator;
 use App\Http\Resources\OrderItemResource;
+use App\Models\InventoryItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Exception;
@@ -39,15 +40,22 @@ class OrderItemController extends Controller
 
         $v = $this->validateRequestData($r, 'update');
 
+
+        // Get the old order-item-status-code.
+        $oldOrderItemStatusCode = OrderItem::find($v['id'])->status_code;
+
         $savedOrderItem = $this->saveWithData($v, 'update');
 
-        // BMD-TODO: Update inventory-item.
-        
+
+        // Update inventory-item.
+        $updatedInventoryItem = InventoryItem::updateStatsWithReferenceObj($savedOrderItem, $oldOrderItemStatusCode);
+
 
         return [
             'isResultOk' => true,
             'objs' => [
-                'savedOrderItem' => new OrderItemResource($savedOrderItem)
+                'savedOrderItem' => new OrderItemResource($savedOrderItem),
+                'updatedInventoryItem' => $updatedInventoryItem
             ]
         ];
     }
