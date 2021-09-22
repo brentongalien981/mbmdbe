@@ -16,6 +16,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ScheduledTaskController;
 use App\Http\Controllers\ScheduledTaskLogController;
+use App\Http\Controllers\ShippingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -110,6 +111,11 @@ Route::post('/dispatches/store', [DispatchController::class, 'store'])->middlewa
 
 /** dispatch-statuses */
 Route::get('/dispatch-statuses', [DispatchStatusController::class, 'index'])->middleware('bmdauth');
+
+
+
+/** shipping */
+Route::post('/shipping/checkPossibleShipping', [ShippingController::class, 'checkPossibleShipping'])->middleware('bmdauth');
 
 
 

@@ -26,4 +26,25 @@ class DispatchPolicy
 
         return false;
     }
+
+
+
+    public function checkPossibleShipping(User $user)
+    {
+        $orderManagerRole = Role::where('name', 'OrderManager')->get()[0];
+        $inventoryManagerRole = Role::where('name', 'InventoryManager')->get()[0];
+        $dispatchManagerRole = Role::where('name', 'DispatchManager')->get()[0];
+
+        $userRoleIds = [];
+
+        foreach ($user->roles as $r) {
+            $userRoleIds[] = $r->id;
+        }
+
+        if (in_array($orderManagerRole->id, $userRoleIds)) { return true; }
+        if (in_array($inventoryManagerRole->id, $userRoleIds)) { return true; }
+        if (in_array($dispatchManagerRole->id, $userRoleIds)) { return true; }
+
+        return false;
+    }
 }
