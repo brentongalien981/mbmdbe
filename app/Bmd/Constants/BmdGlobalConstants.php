@@ -34,9 +34,10 @@ class BmdGlobalConstants
 
 
     // BMD-TAGS: email, order, queue, order-received
-    // BMD-ON-STAGING
+    // BMD-ON-ITER: Development, Staging, Deployment
     public const EMAIL_SENDER_FOR_ORDER_RECEIVED = 'no-reply@asbdev.com';
     public const EMAIL_FOR_ORDER_EMAILS_TRACKER = 'bren.baga@asbdev.com'; // Maybe change this to orderemailstracker@bmd.com
+    public const EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS = 'bren.baga@asbdev.com';
 
 
 
@@ -60,4 +61,24 @@ class BmdGlobalConstants
     // 
     public const NUM_OF_SEC_IN_DAY = 24 * 60 * 60;
     public const MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK = 5000;
+
+
+
+    /**
+     * BMD-SENSITIVE-INFO
+     * BMD-ON-STAGING: Update this everytime when it's needed.
+     * BMD-ON-ITER: Developemnt, Staging, and Deployment: Change this.
+     */
+    public const COMPANY_INFO = [
+        'owner_name' => 'Bren Baga',
+        'company' => 'ASB Dev Inc.',
+        'email' => self::EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS,
+        'street1' => '50 Thorncliffe Park Dr',
+        'street2' => 'Unit 105',
+        'city' => 'East York',
+        'state' => 'ON',
+        'country' => 'CA',
+        'zip' => 'M4H1K4',
+        'phone' => '4164604026'
+    ];
 }
