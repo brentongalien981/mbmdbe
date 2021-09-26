@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\BmdEpAddressException;
 use Exception;
+use App\Models\Order;
 use EasyPost\EasyPost;
 use App\Models\Dispatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Exceptions\BmdEpAddressException;
+use App\Exceptions\CouldNotFindShipmentRatesException;
 use App\Http\BmdHelpers\EpShipmentRecommender;
+use App\Exceptions\NullBmdPredefinedPackageException;
+use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
+use App\Http\BmdHttpResponseCodes\EpShipmentHttpResponseCodes;
 
 class ShippingController extends Controller
 {
@@ -20,8 +25,12 @@ class ShippingController extends Controller
         $entireProcessData = [
             'entireProcessComments' => [],
             'customErrors' => [],
-            'bmdResultCode' => null,
-            'shippingInfo' => null
+            'resultCode' => null,
+            'shippingInfo' => null,
+            'order' => null,
+            'packageInfo' => null,
+            'reducedOrderItemsData' => [],
+            'shouldUsePredefinedPackageProp' => true
         ];
 
 
@@ -32,45 +41,13 @@ class ShippingController extends Controller
 
         try {
 
+            $entireProcessData['order'] = Order::findOrFail($r->orderId);
             $entireProcessData['originAddress'] = EpShipmentRecommender::setOriginAddress($entireProcessData);
+            $entireProcessData['destinationAddress'] = EpShipmentRecommender::setDestinationAddress($entireProcessData);
+            $entireProcessData['parcel'] = EpShipmentRecommender::setParcel($entireProcessData);
+            $entireProcessData['shipment'] = EpShipmentRecommender::setShipment($entireProcessData);
 
-
-
-            // Set EP-destination-address.
-            //     if (!$this->validateDestinationAddress($entireProcessData)) {
-            //         $entireProcessData['resultCode'] = self::INVALID_DESTINATION_COUNTRY_EXCEPTION['code'];
-            //         throw new Exception(self::INVALID_DESTINATION_COUNTRY_EXCEPTION['name']);
-            //     }
-            //     $entireProcessData['destinationAddress'] = $this->setDestinationAddress($entireProcessData);
-
-
-            // Set EP-parcel (predefined-UPS-package-size)
-            //     $entireProcessData['parcel'] = $this->setParcel($entireProcessData);
-
-
-            // Get EP-shipment (with rates)        
-            //     $entireProcessData['packageInfo'] = $entireProcessData['packageInfo'];
-            //     $shipmentObj = $this->setShipment($entireProcessData);
-
-
-            //     // Check.
-            //     if (!$this->doesShipmentHaveRates($shipmentObj)) {
-            //         // Re-create the parcel & shipment.
-            //         $usePredefinedPackageProp = false;
-            //         $entireProcessData['parcel'] = $this->setParcel($entireProcessData, $usePredefinedPackageProp);
-
-            //         $shipmentObj = $this->setShipment($entireProcessData);
-            //     }
-
-
-            //     // 2nd check.
-            //     if (!$this->doesShipmentHaveRates($shipmentObj)) {
-            //         $params['resultCode'] = self::COULD_NOT_FIND_SHIPMENT_RATES['code'];
-            //         throw new Exception(self::COULD_NOT_FIND_SHIPMENT_RATES['name']);
-            //     }
-
-
-            //     $entireProcessData['shipment'] = $shipmentObj;
+            
             //     $entireProcessData['parsedRateObjs'] = $this->getParsedRateObjs($entireProcessData['shipment']->rates);
             //     $entireProcessData['modifiedRateObjs'] = $this->getModifiedRateObjs($entireProcessData['parsedRateObjs']);
             //     $entireProcessData['efficientShipmentRates'] = $this->getEfficientShipmentRates($entireProcessData['modifiedRateObjs']);
@@ -79,7 +56,7 @@ class ShippingController extends Controller
             //     $entireProcessData['resultCode'] = self::ENTIRE_PROCESS_OK['code'];
             //     $entireProcessData['entireProcessComments'][] = self::ENTIRE_PROCESS_OK['name'];
         } catch (Exception $e) {
-            $this->setErroneousBmdResultCodeForCheckPossibleShipping($e, $entireProcessData);
+            $entireProcessData['resultCode'] = $this->setErroneousBmdResultCodeForCheckPossibleShipping($e);
         }
 
 
@@ -96,15 +73,17 @@ class ShippingController extends Controller
 
 
 
-    private function setErroneousBmdResultCodeForCheckPossibleShipping($e, $entireProcessData)
+    private function setErroneousBmdResultCodeForCheckPossibleShipping($e)
     {
         switch (get_class($e)) {
             case BmdEpAddressException::class:
-                // BMD-TODO: Set the CLASS: EpShipmentHttpResponseCodes
-                break;
-            
+                return EpShipmentHttpResponseCodes::getFormattedBmdEpAddressException($e);
+            case NullBmdPredefinedPackageException::class:
+                return EpShipmentHttpResponseCodes::getNullBmdPredefinedPackageExceptionWithTrace($e);
+            case CouldNotFindShipmentRatesException::class:
+                return EpShipmentHttpResponseCodes::getCouldNotFindShipmentRatesExceptionWithTrace($e);
             default:
-                break;
+                return GeneralHttpResponseCodes::getGeneralExceptionCode($e);
         }
     }
 }
