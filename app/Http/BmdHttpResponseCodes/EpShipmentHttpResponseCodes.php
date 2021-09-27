@@ -50,4 +50,16 @@ class EpShipmentHttpResponseCodes
             'exceptionTrace' => [$e->getTrace()[0], $e->getTrace()[1], $e->getTrace()[2]]
         ];
     }
+
+
+    
+    public static function getNotAllowedOrderStatusForProcessException(Exception $e) {
+
+        return [
+            'code' => 'NotAllowedOrderStatusForProcess-1004',
+            'message' => 'NotAllowedOrderStatusForProcess',
+            'readableMessage' => 'NotAllowedOrderStatusForProcess: ' . $e->getMessage(),
+            'exceptionTrace' => [$e->getTrace()[0], $e->getTrace()[1], $e->getTrace()[2]]
+        ];
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Bmd\Generals\GeneralHelper2;
 use Exception;
 use App\Models\Order;
 use EasyPost\EasyPost;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Exceptions\BmdEpAddressException;
 use App\Exceptions\CouldNotFindShipmentRatesException;
+use App\Exceptions\NotAllowedOrderStatusForProcess;
 use App\Http\BmdHelpers\EpShipmentRecommender;
 use App\Exceptions\NullBmdPredefinedPackageException;
 use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
@@ -21,6 +23,7 @@ class ShippingController extends Controller
     public function checkPossibleShipping(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('checkPossibleShipping', Dispatch::class);
+        
 
         $entireProcessData = [
             'entireProcessComments' => [],
@@ -32,6 +35,8 @@ class ShippingController extends Controller
             'reducedOrderItemsData' => [],
             'shouldUsePredefinedPackageProp' => true
         ];
+        
+        $isResultOk = false;
 
 
         // BMD-ON-ITER: Development, Staging
@@ -41,32 +46,28 @@ class ShippingController extends Controller
 
         try {
 
-            $entireProcessData['order'] = Order::findOrFail($r->orderId);
+            $entireProcessData['order'] = Order::findOrFail($r->orderId);            
+            EpShipmentRecommender::guardForOrderStatus($entireProcessData['order']);
+
             $entireProcessData['originAddress'] = EpShipmentRecommender::setOriginAddress($entireProcessData);
             $entireProcessData['destinationAddress'] = EpShipmentRecommender::setDestinationAddress($entireProcessData);
             $entireProcessData['parcel'] = EpShipmentRecommender::setParcel($entireProcessData);
             $entireProcessData['shipment'] = EpShipmentRecommender::setShipment($entireProcessData);
 
-            
-            //     $entireProcessData['parsedRateObjs'] = $this->getParsedRateObjs($entireProcessData['shipment']->rates);
-            //     $entireProcessData['modifiedRateObjs'] = $this->getModifiedRateObjs($entireProcessData['parsedRateObjs']);
-            //     $entireProcessData['efficientShipmentRates'] = $this->getEfficientShipmentRates($entireProcessData['modifiedRateObjs']);
-            //     $entireProcessData['shipmentId'] = $entireProcessData['shipment']->id;
+            $entireProcessData['modifiedRateObjs'] = EpShipmentRecommender::getModifiedRateObjs($entireProcessData['shipment']->rates);
+            $entireProcessData['efficientShipmentRates'] = EpShipmentRecommender::getEfficientShipmentRates($entireProcessData['modifiedRateObjs']);
 
-            //     $entireProcessData['resultCode'] = self::ENTIRE_PROCESS_OK['code'];
-            //     $entireProcessData['entireProcessComments'][] = self::ENTIRE_PROCESS_OK['name'];
+            $entireProcessData['resultCode'] = GeneralHttpResponseCodes::OK;
+            $isResultOk = true;
         } catch (Exception $e) {
             $entireProcessData['resultCode'] = $this->setErroneousBmdResultCodeForCheckPossibleShipping($e);
         }
 
 
-        // $entireProcessData['entireProcessComments'] = $entireProcessData['entireProcessComments'];
-
-
         return [
-            'isResultOk' => true,
+            'isResultOk' => $isResultOk,
             'objs' => [
-                'shippingInfo' => null,
+                'entireProcessData' => GeneralHelper2::pseudoJsonify($entireProcessData)
             ]
         ];
     }
@@ -76,6 +77,8 @@ class ShippingController extends Controller
     private function setErroneousBmdResultCodeForCheckPossibleShipping($e)
     {
         switch (get_class($e)) {
+            case NotAllowedOrderStatusForProcess::class:
+                return EpShipmentHttpResponseCodes::getNotAllowedOrderStatusForProcessException($e);
             case BmdEpAddressException::class:
                 return EpShipmentHttpResponseCodes::getFormattedBmdEpAddressException($e);
             case NullBmdPredefinedPackageException::class:

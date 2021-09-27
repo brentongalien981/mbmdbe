@@ -5,10 +5,15 @@ namespace App\Http\BmdHelpers;
 use EasyPost\Parcel;
 use EasyPost\Address;
 use EasyPost\Shipment;
+use App\Models\ShippingServiceLevel;
 use App\Bmd\Constants\BmdGlobalConstants;
+use App\Bmd\Generals\GeneralHelper2;
 use App\Exceptions\BmdEpAddressException;
-use App\Exceptions\CouldNotFindShipmentRatesException;
 use App\Exceptions\NullBmdPredefinedPackageException;
+use App\Exceptions\CouldNotFindShipmentRatesException;
+use App\Exceptions\NotAllowedOrderStatusForProcess;
+use App\Http\BmdCacheObjects\ShippingServiceLevelModelCollectionCacheObject;
+use App\Models\OrderStatus;
 
 class EpShipmentRecommender
 {
@@ -197,5 +202,100 @@ class EpShipmentRecommender
             return false;
         }
         return true;
+    }
+
+
+
+    /**
+     * For each rate, add value to field "delivery_days" if the retrieved rate has null.
+     *
+     * @param [] $parsedRateObjs
+     * @return []
+     */
+    public static function getModifiedRateObjs($epShipmentRates)
+    {
+        $modifiedRateObjs = [];
+        $shippingServiceLevels = ShippingServiceLevelModelCollectionCacheObject::getUpdatedModelCollection()->data;
+
+        foreach ($epShipmentRates as $r) {
+
+            if ($r->carrier != "UPS") {
+                continue;
+            }
+
+            $aModifiedRateObj = GeneralHelper2::pseudoJsonify($r);
+            if (!isset($r->delivery_days)) {
+                $deliveryDays = ShippingServiceLevel::findDeliveryDaysForService($r->service, $shippingServiceLevels);
+
+                if ($deliveryDays == 0) {
+                    continue;
+                }
+
+                $aModifiedRateObj['delivery_days'] = $deliveryDays;
+            }
+
+            $modifiedRateObjs[] = $aModifiedRateObj;
+        }
+
+        return $modifiedRateObjs;
+    }
+
+
+
+    public static function getEfficientShipmentRates($modifiedRateObjs)
+    {
+        // Get the cheapest of all rates.
+        $cheapestWithFastestRate = null;
+        $cheapestRate = 1000000.0;
+        $fastestDeliveryDays = 365;
+        foreach ($modifiedRateObjs as $r) {
+            if ((floatval($r['rate']) < $cheapestRate) ||
+                (floatval($r['rate']) == $cheapestRate && $r['delivery_days'] < $fastestDeliveryDays)
+            ) {
+                $cheapestRate = floatval($r['rate']);
+                $fastestDeliveryDays = $r['delivery_days'];
+                $cheapestWithFastestRate = $r;
+            }
+        }
+
+
+        // Get the fastest rate that has the cheapest.
+        $fastestWithCheapestRate = null;
+        $cheapestRate = 1000000.0;
+        $fastestDeliveryDays = 365;
+        foreach ($modifiedRateObjs as $r) {
+            if (($r['delivery_days'] < $fastestDeliveryDays) ||
+                ($r['delivery_days'] == $fastestDeliveryDays && floatval($r['rate']) < $cheapestRate)
+            ) {
+                $cheapestRate = floatval($r['rate']);
+                $fastestDeliveryDays = $r['delivery_days'];
+                $fastestWithCheapestRate = $r;
+            }
+        }
+
+
+        $efficientShipmentRates = null;
+        if ($cheapestWithFastestRate['id'] == $fastestWithCheapestRate['id']) {
+            $efficientShipmentRates = [$cheapestWithFastestRate];
+        } else {
+            $efficientShipmentRates = [$cheapestWithFastestRate, $fastestWithCheapestRate];
+        }
+
+        return $efficientShipmentRates;
+    }
+
+
+
+    /**
+     * Validate: Only allow order with status "TO_BE_PACKAGED", "BEING_PACKAGED".
+     */
+    public static function guardForOrderStatus($order)
+    {
+        $allowedStatuses[] = OrderStatus::getCodeByName('TO_BE_PACKAGED');
+        $allowedStatuses[] = OrderStatus::getCodeByName('BEING_PACKAGED');
+
+        if (!in_array($order->status_code, $allowedStatuses)) { 
+            throw new NotAllowedOrderStatusForProcess();
+        }        
     }
 }

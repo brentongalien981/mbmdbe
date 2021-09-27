@@ -49,9 +49,9 @@ class MyShippingPackageManager
         $totalWeight = 0.0;
         foreach ($items as $i) {
 
-            $i = json_decode($i);
-            $p = Product::find($i->productId);
-            $totalWeight += $p->weight * $i->quantity;
+            // $i = json_decode($i);
+            $p = Product::find($i['productId']);
+            $totalWeight += $p->weight * $i['quantity'];
         }
 
         return $totalWeight;
@@ -62,10 +62,10 @@ class MyShippingPackageManager
     /**
      * Sample use: 
      *      $testCartItems = [
-     *          ['id' => 1, 'quantity' => 2, 'productId' => 1, 'itemTypeId' => 1],
-     *          ['id' => 3, 'quantity' => 2, 'productId' => 1, 'itemTypeId' => 1]
+     *          ['id' => 1, 'quantity' => 2, 'productId' => 1, 'packageItemTypeId' => 1],
+     *          ['id' => 3, 'quantity' => 2, 'productId' => 1, 'packageItemTypeId' => 1]
      *      ];
-     *      return self::getPackageInfo(json_encode($testCartItems));
+     *      return self::getPackageInfo($testCartItems);
      */
     public static function getPackageInfo($items)
     {
@@ -79,8 +79,8 @@ class MyShippingPackageManager
         foreach ($itemTypes as $t) {
 
             foreach ($items as $i) {
-                $i = json_decode($i);
-                if ($t->id === $i->packageItemTypeId) {
+                // $i = json_decode($i);
+                if ($t->id === $i['packageItemTypeId']) {
                     $refItemType = $t;
                     $hasFoundRef = true;
                     break;
@@ -106,12 +106,12 @@ class MyShippingPackageManager
 
         foreach ($items as $i) {
 
-            $i = json_decode($i);
+            // $i = json_decode($i);
             $currentItemTotalConvertedQty = 0.00;
             $refConversionRatio = $refItemType->conversion_ratio;
-            $currentItemType = PackageItemType::find($i->packageItemTypeId);
+            $currentItemType = PackageItemType::find($i['packageItemTypeId']);
             $currentItemConversionRatio = $currentItemType->conversion_ratio;
-            $currentItemQty = $i->quantity;
+            $currentItemQty = $i['quantity'];
 
             $currentItemTotalConvertedQty = $refConversionRatio / $currentItemConversionRatio * $currentItemQty;
             $allItemsTotalConvertedQty += $currentItemTotalConvertedQty;
@@ -165,11 +165,9 @@ class MyShippingPackageManager
      * Extract reduced-order-items-data to formulate predefined-package-info.
      * Sample return: 
      *      $data = [
-     *          ['id' => 1, 'quantity' => 2, 'productId' => 1, 'itemTypeId' => 1],
-     *          ['id' => 3, 'quantity' => 2, 'productId' => 1, 'itemTypeId' => 1]
+     *          ['id' => 1, 'quantity' => 2, 'productId' => 1, 'packageItemTypeId' => 1],
+     *          ['id' => 3, 'quantity' => 2, 'productId' => 1, 'packageItemTypeId' => 1]
      *      ];
-     * 
-     *      return json_encode($data)
      * 
      */
     public static function extractReducedOrderItemsData($orderItems)
@@ -180,10 +178,11 @@ class MyShippingPackageManager
             $reducedData[] = [
                 'id' => $oi->id,
                 'productId' => $oi->product_id,
-                'itemTypeId' => Product::find($oi->product_id)->package_item_type_id
+                'quantity' => $oi->quantity,
+                'packageItemTypeId' => Product::find($oi->product_id)->package_item_type_id
             ]; 
         }
 
-        return json_encode($reducedData);
+        return $reducedData;
     }
 }
