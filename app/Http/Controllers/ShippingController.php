@@ -64,10 +64,16 @@ class ShippingController extends Controller
         }
 
 
+        $allProcessData = GeneralHelper2::pseudoJsonify($entireProcessData);
+
         return [
             'isResultOk' => $isResultOk,
             'objs' => [
-                'entireProcessData' => GeneralHelper2::pseudoJsonify($entireProcessData)
+                'resultCode' => $allProcessData['resultCode'],
+                'modifiedRateObjs' => $allProcessData['modifiedRateObjs'],
+                'efficientShipmentRates' => $allProcessData['efficientShipmentRates'],
+                // BMD-ON-ITER: Staging, Deployment: Only return non-sensitive data.
+                'allProcessData' => $allProcessData
             ]
         ];
     }
