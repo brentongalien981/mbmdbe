@@ -22,6 +22,7 @@ class ShippingController extends Controller
 {
     public function checkPossibleShipping(Request $r)
     {
+        
         Gate::forUser(BmdAuthProvider::user())->authorize('checkPossibleShipping', Dispatch::class);
         
 
@@ -33,7 +34,9 @@ class ShippingController extends Controller
             'order' => null,
             'packageInfo' => null,
             'reducedOrderItemsData' => [],
-            'shouldUsePredefinedPackageProp' => true
+            'shouldUsePredefinedPackageProp' => true,
+            'modifiedRateObjs' => null,
+            'efficientShipmentRates' => null,
         ];
         
         $isResultOk = false;
@@ -45,7 +48,7 @@ class ShippingController extends Controller
 
 
         try {
-
+            
             $entireProcessData['order'] = Order::findOrFail($r->orderId);            
             EpShipmentRecommender::guardForOrderStatus($entireProcessData['order']);
 
