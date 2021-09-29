@@ -116,6 +116,8 @@ Route::get('/dispatch-statuses', [DispatchStatusController::class, 'index'])->mi
 
 /** shipping */
 Route::post('/shipping/checkPossibleShipping', [ShippingController::class, 'checkPossibleShipping'])->middleware('bmdauth');
+Route::post('/shipping/buyShippingLabel', [ShippingController::class, 'buyShippingLabel'])->middleware('bmdauth');
+
 
 
 

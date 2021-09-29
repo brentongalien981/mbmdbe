@@ -48,7 +48,7 @@ class ShippingController extends Controller
 
 
         try {
-            
+
             $entireProcessData['order'] = Order::findOrFail($r->orderId);            
             EpShipmentRecommender::guardForOrderStatus($entireProcessData['order']);
 
@@ -97,5 +97,28 @@ class ShippingController extends Controller
             default:
                 return GeneralHttpResponseCodes::getGeneralExceptionCode($e);
         }
+    }
+
+
+
+    public function buyShippingLabel(Request $r)
+    {
+        // BMD-TODO
+        // Gate::forUser(BmdAuthProvider::user())->authorize('buyShippingLabel', Dispatch::class);
+        
+
+        $isResultOk = false;
+
+
+        // BMD-ON-ITER: Development, Staging
+        // EasyPost::setApiKey(env('EASYPOST_TK'));
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+
+            ]
+        ];
     }
 }
