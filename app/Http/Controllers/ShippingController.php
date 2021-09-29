@@ -17,14 +17,16 @@ use App\Http\BmdHelpers\EpShipmentRecommender;
 use App\Exceptions\NullBmdPredefinedPackageException;
 use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
 use App\Http\BmdHttpResponseCodes\EpShipmentHttpResponseCodes;
+use EasyPost\Rate;
+use EasyPost\Shipment;
 
 class ShippingController extends Controller
 {
     public function checkPossibleShipping(Request $r)
     {
-        
+
         Gate::forUser(BmdAuthProvider::user())->authorize('checkPossibleShipping', Dispatch::class);
-        
+
 
         $entireProcessData = [
             'entireProcessComments' => [],
@@ -38,7 +40,7 @@ class ShippingController extends Controller
             'modifiedRateObjs' => null,
             'efficientShipmentRates' => null,
         ];
-        
+
         $isResultOk = false;
 
 
@@ -49,7 +51,7 @@ class ShippingController extends Controller
 
         try {
 
-            $entireProcessData['order'] = Order::findOrFail($r->orderId);            
+            $entireProcessData['order'] = Order::findOrFail($r->orderId);
             EpShipmentRecommender::guardForOrderStatus($entireProcessData['order']);
 
             $entireProcessData['originAddress'] = EpShipmentRecommender::setOriginAddress($entireProcessData);
@@ -75,6 +77,7 @@ class ShippingController extends Controller
                 'resultCode' => $allProcessData['resultCode'],
                 'modifiedRateObjs' => $allProcessData['modifiedRateObjs'],
                 'efficientShipmentRates' => $allProcessData['efficientShipmentRates'],
+                'epShipmentId' => $allProcessData['shipment']['id'] ?? '',
                 // BMD-ON-ITER: Staging, Deployment: Only return non-sensitive data.
                 'allProcessData' => $allProcessData
             ]
@@ -103,21 +106,76 @@ class ShippingController extends Controller
 
     public function buyShippingLabel(Request $r)
     {
-        // BMD-TODO
-        // Gate::forUser(BmdAuthProvider::user())->authorize('buyShippingLabel', Dispatch::class);
-        
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
 
         $isResultOk = false;
+        $resultCode = null;
+
+        // BMD-TODO
+        $entireProcessData = [
+            'comments' => [],
+            'resultCode' => null,
+            'order' => null,
+            'epShipment' => null,
+            'epShipmentRate' => null
+        ];
 
 
-        // BMD-ON-ITER: Development, Staging
-        // EasyPost::setApiKey(env('EASYPOST_TK'));
+        try {
+
+            // BMD-ON-ITER: Development, Staging
+            EasyPost::setApiKey(env('EASYPOST_TK'));
+
+
+            // Reference order.
+            $order = Order::findOrFail($r->orderId);
+
+
+            // Retrieve EP-shipment.
+            $epShipment = Shipment::retrieve($r->probableShippingId);
+
+
+            // Retrieve EP-shipment-rate.
+            $epShipmentRate = Rate::retrieve($r->selectedShippingRateId);
+
+
+            // Buy EP-shipment.
+            $boughtEpShipment = $epShipment->buy(['rate' => $epShipmentRate]);
+
+
+
+            // Update order's status to "SHIPPING_LABEL_BOUGHT", and ep-shipment-id.
+
+
+            // Set return data.
+            $entireProcessData = [
+                'order' => $order,
+                'epShipment' => $epShipment,
+                'epShipmentRate' => $epShipmentRate,
+                'boughtEpShipment' => $boughtEpShipment,
+                'resultCode' => GeneralHttpResponseCodes::OK
+            ];
+        } catch (Exception $e) {
+
+            $entireProcessData['resultCode'] = GeneralHttpResponseCodes::getGeneralExceptionCode($e);
+        }
 
 
         return [
             'isResultOk' => $isResultOk,
             'objs' => [
+                // updated-order
 
+                // updated-ep-shipment
+
+                //
+                'entireProcessData' => GeneralHelper2::pseudoJsonify($entireProcessData)
+            ],
+            // BMD-DELETE
+            'requestData' => [
+                'selectedShippingRateId' => $r->selectedShippingRateId,
+                'orderId' => $r->orderId,
+                'probableShippingId' => $r->probableShippingId
             ]
         ];
     }
