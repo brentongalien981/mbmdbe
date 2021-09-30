@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\Models\Cart;
 use App\Models\Order;
+use EasyPost\EasyPost;
+use EasyPost\Shipment;
 use App\Models\OrderStatus;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\OrderItemStatus;
 use App\Bmd\Generals\GeneralHelper;
+use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\Resources\OrderItemResource;
-use App\Models\Cart;
-use App\Models\OrderItemStatus;
 
 class OrderController extends Controller
 {
@@ -113,8 +116,23 @@ class OrderController extends Controller
             'orderId' => 'required|string|size:36',
         ]);
 
+        $entireProcessComments = [];
+
 
         $o = Order::find($v['orderId']);
+
+
+        $actualEpShipment = null;
+        try {
+            // BMD-ON-ITER: Development, Staging
+            EasyPost::setApiKey(env('EASYPOST_TK'));
+
+            if ($o->ep_shipment_id) {
+                $actualEpShipment = Shipment::retrieve($o->ep_shipment_id) ?? null;
+            }
+        } catch (\Throwable $th) {
+            $entireProcessComments[] = $th->getMessage();
+        }
 
 
         return [
@@ -123,7 +141,9 @@ class OrderController extends Controller
                 'order' => new OrderResource($o) ?? [],
                 'orderItems' => OrderItemResource::collection($o->orderItems) ?? [],
                 'orderStatuses' => OrderStatus::orderBy('name', 'asc')->get(),
-                'orderItemStatuses' => OrderItemStatus::orderBy('name', 'asc')->get()
+                'orderItemStatuses' => OrderItemStatus::orderBy('name', 'asc')->get(),
+                'actualEpShipment' => GeneralHelper2::pseudoJsonify($actualEpShipment),
+                'entireProcessComments' => $entireProcessComments
             ]
         ];
     }

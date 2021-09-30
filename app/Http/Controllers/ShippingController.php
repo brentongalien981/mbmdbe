@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
-use App\Bmd\Generals\GeneralHelper2;
 use Exception;
+use EasyPost\Rate;
 use App\Models\Order;
 use EasyPost\EasyPost;
+use EasyPost\Shipment;
 use App\Models\Dispatch;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
+use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
+use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Exceptions\BmdEpAddressException;
-use App\Exceptions\CouldNotFindShipmentRatesException;
-use App\Exceptions\NotAllowedOrderStatusForProcess;
 use App\Http\BmdHelpers\EpShipmentRecommender;
+use App\Exceptions\NotAllowedOrderStatusForProcess;
 use App\Exceptions\NullBmdPredefinedPackageException;
+use App\Exceptions\CouldNotFindShipmentRatesException;
 use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
 use App\Http\BmdHttpResponseCodes\EpShipmentHttpResponseCodes;
-use EasyPost\Rate;
-use EasyPost\Shipment;
 
 class ShippingController extends Controller
 {
@@ -109,15 +111,12 @@ class ShippingController extends Controller
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
 
         $isResultOk = false;
-        $resultCode = null;
 
-        // BMD-TODO
         $entireProcessData = [
             'comments' => [],
             'resultCode' => null,
             'order' => null,
-            'epShipment' => null,
-            'epShipmentRate' => null
+            'epShipment' => null
         ];
 
 
@@ -126,35 +125,26 @@ class ShippingController extends Controller
             // BMD-ON-ITER: Development, Staging
             EasyPost::setApiKey(env('EASYPOST_TK'));
 
-
             // Reference order.
-            $order = Order::findOrFail($r->orderId);
-
+            $entireProcessData['order'] = Order::findOrFail($r->orderId);
 
             // Retrieve EP-shipment.
-            $epShipment = Shipment::retrieve($r->probableShippingId);
-
+            $entireProcessData['epShipment'] = Shipment::retrieve($r->probableShippingId);
 
             // Retrieve EP-shipment-rate.
             $epShipmentRate = Rate::retrieve($r->selectedShippingRateId);
 
-
             // Buy EP-shipment.
-            $boughtEpShipment = $epShipment->buy(['rate' => $epShipmentRate]);
-
-
+            $entireProcessData['epShipment']->buy(['rate' => $epShipmentRate]);
 
             // Update order's status to "SHIPPING_LABEL_BOUGHT", and ep-shipment-id.
+            $entireProcessData['order']->ep_shipment_id = $entireProcessData['epShipment']->id;
+            $entireProcessData['order']->status_code = OrderStatus::getCodeByName('SHIPPING_LABEL_BOUGHT');
+            $entireProcessData['order']->save();
 
+            $isResultOk = true;
+            $entireProcessData['resultCode'] = GeneralHttpResponseCodes::OK;
 
-            // Set return data.
-            $entireProcessData = [
-                'order' => $order,
-                'epShipment' => $epShipment,
-                'epShipmentRate' => $epShipmentRate,
-                'boughtEpShipment' => $boughtEpShipment,
-                'resultCode' => GeneralHttpResponseCodes::OK
-            ];
         } catch (Exception $e) {
 
             $entireProcessData['resultCode'] = GeneralHttpResponseCodes::getGeneralExceptionCode($e);
@@ -164,18 +154,9 @@ class ShippingController extends Controller
         return [
             'isResultOk' => $isResultOk,
             'objs' => [
-                // updated-order
-
-                // updated-ep-shipment
-
-                //
-                'entireProcessData' => GeneralHelper2::pseudoJsonify($entireProcessData)
-            ],
-            // BMD-DELETE
-            'requestData' => [
-                'selectedShippingRateId' => $r->selectedShippingRateId,
-                'orderId' => $r->orderId,
-                'probableShippingId' => $r->probableShippingId
+                'order' => new OrderResource($entireProcessData['order']) ?? [],
+                'epShipment' => GeneralHelper2::pseudoJsonify($entireProcessData['epShipment']),
+                'resultCode' => GeneralHelper2::pseudoJsonify($entireProcessData['resultCode'])
             ]
         ];
     }
