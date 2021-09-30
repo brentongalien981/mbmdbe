@@ -14,6 +14,7 @@ use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\Resources\DispatchResource;
 use App\Exceptions\BmdEpAddressException;
 use App\Http\BmdHelpers\EpShipmentRecommender;
 use App\Exceptions\NotAllowedOrderStatusForProcess;
@@ -156,6 +157,7 @@ class ShippingController extends Controller
             'objs' => [
                 'order' => new OrderResource($entireProcessData['order']) ?? [],
                 'epShipment' => GeneralHelper2::pseudoJsonify($entireProcessData['epShipment']),
+                'dispatches' => DispatchResource::collection(Dispatch::getAvailableDispatches()),
                 'resultCode' => GeneralHelper2::pseudoJsonify($entireProcessData['resultCode'])
             ]
         ];

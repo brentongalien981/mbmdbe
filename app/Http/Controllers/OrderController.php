@@ -16,7 +16,9 @@ use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\Resources\DispatchResource;
 use App\Http\Resources\OrderItemResource;
+use App\Models\Dispatch;
 
 class OrderController extends Controller
 {
@@ -143,6 +145,7 @@ class OrderController extends Controller
                 'orderStatuses' => OrderStatus::orderBy('name', 'asc')->get(),
                 'orderItemStatuses' => OrderItemStatus::orderBy('name', 'asc')->get(),
                 'actualEpShipment' => GeneralHelper2::pseudoJsonify($actualEpShipment),
+                'dispatches' => DispatchResource::collection(Dispatch::getAvailableDispatches()),
                 'entireProcessComments' => $entireProcessComments
             ]
         ];
