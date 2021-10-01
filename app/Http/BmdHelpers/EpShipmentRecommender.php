@@ -14,6 +14,7 @@ use App\Exceptions\CouldNotFindShipmentRatesException;
 use App\Exceptions\NotAllowedOrderStatusForProcess;
 use App\Http\BmdCacheObjects\ShippingServiceLevelModelCollectionCacheObject;
 use App\Models\OrderStatus;
+use Exception;
 
 class EpShipmentRecommender
 {
@@ -297,5 +298,14 @@ class EpShipmentRecommender
         if (!in_array($order->status_code, $allowedStatuses)) { 
             throw new NotAllowedOrderStatusForProcess();
         }        
+    }
+
+
+
+    public static function guardForAlreadyExistingShipment($order)
+    {
+        if ($order->ep_shipment_id) {
+            throw new Exception('Order already belongs to shipment.');
+        }
     }
 }

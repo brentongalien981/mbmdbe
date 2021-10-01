@@ -56,6 +56,7 @@ class ShippingController extends Controller
 
             $entireProcessData['order'] = Order::findOrFail($r->orderId);
             EpShipmentRecommender::guardForOrderStatus($entireProcessData['order']);
+            EpShipmentRecommender::guardForAlreadyExistingShipment($entireProcessData['order']);
 
             $entireProcessData['originAddress'] = EpShipmentRecommender::setOriginAddress($entireProcessData);
             $entireProcessData['destinationAddress'] = EpShipmentRecommender::setDestinationAddress($entireProcessData);
@@ -128,6 +129,7 @@ class ShippingController extends Controller
 
             // Reference order.
             $entireProcessData['order'] = Order::findOrFail($r->orderId);
+            EpShipmentRecommender::guardForAlreadyExistingShipment($entireProcessData['order']);
 
             // Retrieve EP-shipment.
             $entireProcessData['epShipment'] = Shipment::retrieve($r->probableShippingId);

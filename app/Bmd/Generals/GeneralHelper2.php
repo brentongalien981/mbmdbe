@@ -3,8 +3,7 @@
 namespace App\Bmd\Generals;
 
 use EasyPost\EasyPost;
-
-
+use Exception;
 
 class GeneralHelper2
 {
@@ -49,7 +48,10 @@ class GeneralHelper2
             case 'staging':
             case 'production':
             case 'deployment':
-                $apiKey = env('EASYPOST_PK');
+                // BMD-ON-ITER: Staging, Deployment, Production:
+                // Comment this out.
+                throw new Exception('Trying to use EP-PK');
+                // $apiKey = env('EASYPOST_PK');
                 break;
         }
 
