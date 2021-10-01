@@ -2,6 +2,8 @@
 
 namespace App\Bmd\Generals;
 
+use EasyPost\EasyPost;
+
 
 
 class GeneralHelper2
@@ -33,5 +35,25 @@ class GeneralHelper2
         }
 
         return $jsonifiedObj;
+    }
+
+
+
+    public static function setEasyPostApiKey()
+    {
+
+        $apiKey = env('EASYPOST_TK');
+        $appEnv = env('APP_ENV');
+
+        switch ($appEnv) {
+            case 'staging':
+            case 'production':
+            case 'deployment':
+                $apiKey = env('EASYPOST_PK');
+                break;
+        }
+
+
+        EasyPost::setApiKey($apiKey);
     }
 }

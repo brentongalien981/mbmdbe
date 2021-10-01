@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Bmd\Generals\GeneralHelper2;
+use Exception;
 use EasyPost\Batch;
+use App\Models\Order;
 use EasyPost\EasyPost;
 use App\Models\Dispatch;
 use Illuminate\Http\Request;
 use App\Models\DispatchStatus;
+use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
 use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\BmdHelpers\EpBatchHelper;
 use App\Http\Resources\DispatchResource;
-use Exception;
+use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
+use App\Http\Resources\OrderResource;
+use App\Models\OrderStatus;
 
 class DispatchController extends Controller
 {
@@ -102,5 +107,44 @@ class DispatchController extends Controller
             ->orderBy('created_at', 'desc');
 
         return $dispatchesQuery;
+    }
+
+
+
+    public function addOrderToDispatch(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $order = null;
+        $dispatch = null;
+        $resultCode = null;
+
+
+        try {
+            GeneralHelper2::setEasyPostApiKey();
+
+            $order = Order::findOrFail($r->orderId);
+            $dispatch = Dispatch::findOrFail($r->dispatchId);
+
+            EpBatchHelper::addShipmentToBatch($order, $dispatch);
+
+            $order->dispatch_id = $dispatch->id;
+            $order->status_code = OrderStatus::getCodeByName('TO_BE_DISPATCHED');
+            $order->save();
+            
+            $isResultOk = true;
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'order' => new OrderResource($order)
+            ],
+            'resultCode' => $resultCode
+        ];
     }
 }

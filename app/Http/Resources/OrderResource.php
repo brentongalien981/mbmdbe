@@ -19,6 +19,7 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'user_id' => $this->user_id,// ?? 'n/a',
             'stripe_payment_intent_id' => $this->stripe_payment_intent_id,
+            'dispatch_id' => $this->dispatch_id,
             'cart_id' => $this->cart_id,
 
             'first_name' => $this->first_name,
