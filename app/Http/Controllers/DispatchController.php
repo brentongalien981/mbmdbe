@@ -180,6 +180,7 @@ class DispatchController extends Controller
             'isResultOk' => $isResultOk,
             'objs' => [
                 'dispatch' => $dispatch,
+                'dispatchStatuses' => DispatchStatus::orderBy('name', 'asc')->get(),
                 'epBatch' => $epBatch
             ],
             'resultCode' => $resultCode
