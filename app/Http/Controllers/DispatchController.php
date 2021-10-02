@@ -132,7 +132,7 @@ class DispatchController extends Controller
             $order->dispatch_id = $dispatch->id;
             $order->status_code = OrderStatus::getCodeByName('TO_BE_DISPATCHED');
             $order->save();
-            
+
             $isResultOk = true;
         } catch (\Throwable $th) {
             $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
@@ -143,6 +143,44 @@ class DispatchController extends Controller
             'isResultOk' => $isResultOk,
             'objs' => [
                 'order' => new OrderResource($order)
+            ],
+            'resultCode' => $resultCode
+        ];
+    }
+
+
+
+    public function show(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+
+        $isResultOk = false;
+        $dispatch = null;
+        $epBatch = null;
+        $resultCode = null;
+
+
+        try {
+            GeneralHelper2::setEasyPostApiKey();
+
+            $dispatch = Dispatch::findOrFail($r->dispatchId);
+            $dispatch = new DispatchResource($dispatch);
+
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+            $epBatch = GeneralHelper2::pseudoJsonify($epBatch);
+
+            $isResultOk = true;
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }    
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'dispatch' => $dispatch,
+                'epBatch' => $epBatch
             ],
             'resultCode' => $resultCode
         ];

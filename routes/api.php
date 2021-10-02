@@ -107,6 +107,7 @@ Route::get('/purchase-statuses', [PurchaseStatusController::class, 'index'])->mi
 Route::get('/dispatches', [DispatchController::class, 'index'])->middleware('bmdauth');
 Route::post('/dispatches/store', [DispatchController::class, 'store'])->middleware('bmdauth');
 Route::post('/dispatches/addOrderToDispatch', [DispatchController::class, 'addOrderToDispatch'])->middleware('bmdauth');
+Route::get('/dispatches/show', [DispatchController::class, 'show'])->middleware('bmdauth');
 
 
 
