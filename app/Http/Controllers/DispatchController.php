@@ -158,7 +158,8 @@ class DispatchController extends Controller
         $isResultOk = false;
         $dispatch = null;
         $epBatch = null;
-        $resultCode = null;
+        $dispatchOrders = [];
+        $resultCode = null;        
 
 
         try {
@@ -169,6 +170,8 @@ class DispatchController extends Controller
 
             $epBatch = Batch::retrieve($dispatch->ep_batch_id);
             $epBatch = GeneralHelper2::pseudoJsonify($epBatch);
+
+            $dispatchOrders = OrderResource::collection($dispatch->orders);
 
             $isResultOk = true;
         } catch (\Throwable $th) {
@@ -181,6 +184,7 @@ class DispatchController extends Controller
             'objs' => [
                 'dispatch' => $dispatch,
                 'dispatchStatuses' => DispatchStatus::orderBy('name', 'asc')->get(),
+                'dispatchOrders' => $dispatchOrders,
                 'epBatch' => $epBatch
             ],
             'resultCode' => $resultCode

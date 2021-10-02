@@ -17,4 +17,11 @@ class Dispatch extends Model
 
         return self::whereIn('status_code', $statuses)->orderBy('created_at', 'desc')->get();
     }
+
+
+
+    public function orders() 
+    {
+        return $this->hasMany(Order::class);
+    }
 }
