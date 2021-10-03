@@ -152,8 +152,7 @@ class DispatchController extends Controller
 
     public function show(Request $r)
     {
-        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
-
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);        
 
         $isResultOk = false;
         $dispatch = null;
