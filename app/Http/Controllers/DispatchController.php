@@ -150,15 +150,73 @@ class DispatchController extends Controller
 
 
 
+    public function removeOrderFromDispatch(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $order = null;
+        $dispatch = null;
+        $epBatch = null;
+        $resultCode = null;
+
+        
+        try {
+            GeneralHelper2::setEasyPostApiKey();
+
+            $order = Order::findOrFail($r->orderId);
+            $dispatch = Dispatch::findOrFail($r->dispatchId);
+
+
+            // Validate that order belongs to dispatch.            
+            if ($order->dispatch_id != $dispatch->id) {
+                throw new Exception('Order has wrong dispatch id.');
+            }
+
+
+            // Validate that ep-batch has ep-shipment-id equal to order's ep-shipment-id.
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+            if (!EpBatchHelper::doesBatchHaveShipmentWithId($epBatch, $order->ep_shipment_id)) {
+                throw new Exception('EP-Batch does not have that EP-Shipment.');
+            }
+
+
+            // Remove ep-shipment from ep-batch.
+            EpBatchHelper::removeShipmentFromBatch($epBatch, $order->ep_shipment_id);
+
+
+            // Set order's dispatch-id to null.
+            $order->dispatch_id = null;
+            $order->save();
+
+            $isResultOk = true;
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'dispatch' => new DispatchResource($dispatch),
+                'dispatchOrders' => OrderResource::collection($dispatch->orders),
+                'epBatch' => GeneralHelper2::pseudoJsonify($epBatch)
+            ],
+            'resultCode' => $resultCode
+        ];
+    }
+
+
+
     public function show(Request $r)
     {
-        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);        
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
 
         $isResultOk = false;
         $dispatch = null;
         $epBatch = null;
         $dispatchOrders = [];
-        $resultCode = null;        
+        $resultCode = null;
 
 
         try {
@@ -175,7 +233,7 @@ class DispatchController extends Controller
             $isResultOk = true;
         } catch (\Throwable $th) {
             $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
-        }    
+        }
 
 
         return [

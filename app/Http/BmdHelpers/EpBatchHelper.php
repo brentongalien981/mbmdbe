@@ -41,4 +41,29 @@ class EpBatchHelper
         $epBatch = Batch::retrieve($dispatch->ep_batch_id);
         $epBatch->add_shipments(['shipments' => $batchingShipmentsParams]);
     }
+
+
+
+    public static function doesBatchHaveShipmentWithId($epBatch, $epShipmentId)
+    {
+        foreach ($epBatch->shipments as $shipment) {
+            if ($shipment->id == $epShipmentId) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    
+    public static function removeShipmentFromBatch($epBatch, $epShipmentId)
+    {
+
+        $batchingShipmentsParamsToRemove = [];
+        $batchingShipmentsParamsToRemove[] = ['id' => $epShipmentId];
+
+        $epBatch->remove_shipments(['shipments' => $batchingShipmentsParamsToRemove]);
+
+    }
 }

@@ -108,6 +108,7 @@ Route::get('/dispatches', [DispatchController::class, 'index'])->middleware('bmd
 Route::post('/dispatches/store', [DispatchController::class, 'store'])->middleware('bmdauth');
 Route::post('/dispatches/addOrderToDispatch', [DispatchController::class, 'addOrderToDispatch'])->middleware('bmdauth');
 Route::get('/dispatches/show', [DispatchController::class, 'show'])->middleware('bmdauth');
+Route::post('/dispatches/removeOrderFromDispatch', [DispatchController::class, 'removeOrderFromDispatch'])->middleware('bmdauth');
 
 
 
