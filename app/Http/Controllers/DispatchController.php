@@ -4,19 +4,21 @@ namespace App\Http\Controllers;
 
 use Exception;
 use EasyPost\Batch;
+use EasyPost\Pickup;
 use App\Models\Order;
 use EasyPost\EasyPost;
+use EasyPost\Shipment;
 use App\Models\Dispatch;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use App\Models\DispatchStatus;
 use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
-use App\Http\BmdHelpers\BmdAuthProvider;
+use App\Http\Resources\OrderResource;
 use App\Http\BmdHelpers\EpBatchHelper;
+use App\Http\BmdHelpers\BmdAuthProvider;
 use App\Http\Resources\DispatchResource;
 use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
-use App\Http\Resources\OrderResource;
-use App\Models\OrderStatus;
 
 class DispatchController extends Controller
 {
@@ -245,6 +247,78 @@ class DispatchController extends Controller
                 'epBatch' => $epBatch
             ],
             'resultCode' => $resultCode
+        ];
+    }
+
+
+
+    public function saveEpBatchPickupInfo(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $aDispatchOrder = null;
+        $anEpShipmentAddress = null;
+        $dispatch = null;
+        $epBatch = null;
+        $epPickup = null;
+        $resultCode = null;
+
+        
+        try {
+            GeneralHelper2::setEasyPostApiKey();
+
+            
+            // Reference dispatch, epBatch
+            $dispatch = Dispatch::findOrFail($r->dispatchId);
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);   
+            
+            if ($epBatch->pickup) {
+                throw new Exception('EP-Batch already has pickup.');
+            }
+
+
+            // Reference the epPickup's address.
+            $aDispatchOrder = $dispatch->orders[0] ?? null;
+            if (!$aDispatchOrder) {
+                throw new Exception('This dispatch has no orders.');
+            }
+            $anEpShipmentAddress = Shipment::retrieve($aDispatchOrder->ep_shipment_id)->from_address;
+            $aDispatchOrder = new OrderResource($aDispatchOrder) ?? null;
+
+
+            // Set epPickup
+            $epPickup = Pickup::create([
+                'address' => $anEpShipmentAddress,
+                'batch' => $epBatch,
+                'reference' => $r->referenceString,
+                'min_datetime' => date('Y-m-d H:i:s T', strtotime($r->epBatchEarliestPickupDatetime)),
+                'max_datetime' => date('Y-m-d H:i:s T', strtotime($r->epBatchLatestPickupDatetime)),
+                'is_account_address' => false,
+                'instructions' => $r->carrierNotes
+            ]);
+
+            
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);    
+
+
+            $isResultOk = true;
+
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'aDispatchOrder' => $aDispatchOrder,
+                'dispatch' => new DispatchResource($dispatch),
+                'anEpShipmentAddress' => GeneralHelper2::pseudoJsonify($anEpShipmentAddress),
+                'epBatch' => GeneralHelper2::pseudoJsonify($epBatch),
+                'epPickup' => GeneralHelper2::pseudoJsonify($epPickup)
+            ],
+            'resultCode' => $resultCode          
         ];
     }
 }
