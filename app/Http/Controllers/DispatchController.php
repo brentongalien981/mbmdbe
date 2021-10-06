@@ -321,4 +321,43 @@ class DispatchController extends Controller
             'resultCode' => $resultCode          
         ];
     }
+
+
+    
+    public function buyPickupRate(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $aDispatchOrder = null;
+        $anEpShipmentAddress = null;
+        $dispatch = null;
+        $epBatch = null;
+        $epPickup = null;
+        $resultCode = null;
+
+        
+        try {
+            // GeneralHelper2::setEasyPostApiKey(); 
+
+
+            // $isResultOk = true;
+
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                // 'aDispatchOrder' => $aDispatchOrder,
+                // 'dispatch' => new DispatchResource($dispatch),
+                // 'anEpShipmentAddress' => GeneralHelper2::pseudoJsonify($anEpShipmentAddress),
+                // 'epBatch' => GeneralHelper2::pseudoJsonify($epBatch),
+                // 'epPickup' => GeneralHelper2::pseudoJsonify($epPickup)
+            ],
+            'resultCode' => $resultCode          
+        ];
+    }
 }

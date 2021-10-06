@@ -110,6 +110,7 @@ Route::post('/dispatches/addOrderToDispatch', [DispatchController::class, 'addOr
 Route::get('/dispatches/show', [DispatchController::class, 'show'])->middleware('bmdauth');
 Route::post('/dispatches/removeOrderFromDispatch', [DispatchController::class, 'removeOrderFromDispatch'])->middleware('bmdauth');
 Route::post('/dispatches/saveEpBatchPickupInfo', [DispatchController::class, 'saveEpBatchPickupInfo'])->middleware('bmdauth');
+Route::post('/dispatches/buyPickupRate', [DispatchController::class, 'buyPickupRate'])->middleware('bmdauth');
 
 
 
