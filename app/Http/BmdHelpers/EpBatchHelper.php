@@ -66,4 +66,42 @@ class EpBatchHelper
         $epBatch->remove_shipments(['shipments' => $batchingShipmentsParamsToRemove]);
 
     }
+
+
+
+    public static function buyPickupRate($epPickup, $epPickupRateId)
+    {
+
+        $selectedPickupRate = null;
+        
+        foreach ($epPickup->pickup_rates as $r) {
+            if ($r->id === $epPickupRateId) {
+                $selectedPickupRate = $r;
+            }
+        }
+
+        if (!$selectedPickupRate) { throw new Exception('No matching EP-Pickup Rate found.'); }
+
+        $epPickup->buy([
+            'carrier' => $selectedPickupRate->carrier,
+            'service' => $selectedPickupRate->service
+        ]);
+
+        
+        return $selectedPickupRate;
+    }
+
+
+
+    public static function validateObjsForBuyingPickup($epBatch, $epPickup)
+    {
+        // check if dispatch, ep-batch, ep-pickup are all related
+        if (!$epBatch) { throw new Exception('Invalid EP-Batch'); }
+        if (!$epPickup) { throw new Exception('Invalid EP-Pickup'); }
+        if (!$epBatch->pickup || $epBatch->pickup->id !== $epPickup->id) { throw new Exception('Invalid EP-Pickup'); }
+
+
+        // check if ep-pickup hasn’t been bought yet
+        if ($epPickup->status === 'scheduled' || $epPickup->confirmation) { throw new Exception('EP-Pickup has already been bought.'); }
+    }
 }

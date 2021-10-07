@@ -162,7 +162,7 @@ class DispatchController extends Controller
         $epBatch = null;
         $resultCode = null;
 
-        
+
         try {
             GeneralHelper2::setEasyPostApiKey();
 
@@ -264,15 +264,15 @@ class DispatchController extends Controller
         $epPickup = null;
         $resultCode = null;
 
-        
+
         try {
             GeneralHelper2::setEasyPostApiKey();
 
-            
+
             // Reference dispatch, epBatch
             $dispatch = Dispatch::findOrFail($r->dispatchId);
-            $epBatch = Batch::retrieve($dispatch->ep_batch_id);   
-            
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+
             if ($epBatch->pickup) {
                 throw new Exception('EP-Batch already has pickup.');
             }
@@ -298,12 +298,11 @@ class DispatchController extends Controller
                 'instructions' => $r->carrierNotes
             ]);
 
-            
-            $epBatch = Batch::retrieve($dispatch->ep_batch_id);    
+
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
 
 
             $isResultOk = true;
-
         } catch (\Throwable $th) {
             $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
         }
@@ -318,30 +317,53 @@ class DispatchController extends Controller
                 'epBatch' => GeneralHelper2::pseudoJsonify($epBatch),
                 'epPickup' => GeneralHelper2::pseudoJsonify($epPickup)
             ],
-            'resultCode' => $resultCode          
+            'resultCode' => $resultCode
         ];
     }
 
 
-    
+
     public function buyPickupRate(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
 
         $isResultOk = false;
-        $aDispatchOrder = null;
-        $anEpShipmentAddress = null;
         $dispatch = null;
         $epBatch = null;
         $epPickup = null;
+        $epPickupRate = null;
         $resultCode = null;
 
-        
+
         try {
-            // GeneralHelper2::setEasyPostApiKey(); 
+            GeneralHelper2::setEasyPostApiKey(); 
+
+            
+            $dispatch = Dispatch::findOrFail($r->dispatchId);
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+            $epPickup = Pickup::retrieve($r->epPickupId);
+            
+
+            EpBatchHelper::validateObjsForBuyingPickup($epBatch, $epPickup);
+            $epPickupRate = EpBatchHelper::buyPickupRate($epPickup, $r->epPickupRateId);
 
 
-            // $isResultOk = true;
+            // update dispatch
+            $newDispatchStatusCode = DispatchStatus::where('name', 'EP_PICKUP_BOUGHT')->get()[0]->code;
+            $dispatch->status_code = $newDispatchStatusCode;
+            $dispatch->pickup_cost = $epPickupRate->rate;
+            $dispatch->save();
+
+
+            $isResultOk = true;
+
+
+            // Re-reference the updated objs.
+            $dispatch = new DispatchResource($dispatch);
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+            $epBatch = GeneralHelper2::pseudoJsonify($epBatch);
+            $epPickupRate = GeneralHelper2::pseudoJsonify($epPickupRate);
+
 
         } catch (\Throwable $th) {
             $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
@@ -351,13 +373,11 @@ class DispatchController extends Controller
         return [
             'isResultOk' => $isResultOk,
             'objs' => [
-                // 'aDispatchOrder' => $aDispatchOrder,
-                // 'dispatch' => new DispatchResource($dispatch),
-                // 'anEpShipmentAddress' => GeneralHelper2::pseudoJsonify($anEpShipmentAddress),
-                // 'epBatch' => GeneralHelper2::pseudoJsonify($epBatch),
-                // 'epPickup' => GeneralHelper2::pseudoJsonify($epPickup)
+                'dispatch' => $dispatch,
+                'epBatch' => $epBatch,
+                'epPickupRate' => $epPickupRate
             ],
-            'resultCode' => $resultCode          
+            'resultCode' => $resultCode
         ];
     }
 }
