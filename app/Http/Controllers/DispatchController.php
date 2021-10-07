@@ -336,15 +336,15 @@ class DispatchController extends Controller
 
 
         try {
-            GeneralHelper2::setEasyPostApiKey(); 
+            GeneralHelper2::setEasyPostApiKey();
 
-            
-            $dispatch = Dispatch::findOrFail($r->dispatchId);
+
+            $dispatch = Dispatch::find($r->dispatchId);
             $epBatch = Batch::retrieve($dispatch->ep_batch_id);
             $epPickup = Pickup::retrieve($r->epPickupId);
-            
 
-            EpBatchHelper::validateObjsForBuyingPickup($epBatch, $epPickup);
+
+            EpBatchHelper::validateObjsForBuyingPickup($dispatch, $epBatch, $epPickup);
             $epPickupRate = EpBatchHelper::buyPickupRate($epPickup, $r->epPickupRateId);
 
 
@@ -363,8 +363,6 @@ class DispatchController extends Controller
             $epBatch = Batch::retrieve($dispatch->ep_batch_id);
             $epBatch = GeneralHelper2::pseudoJsonify($epBatch);
             $epPickupRate = GeneralHelper2::pseudoJsonify($epPickupRate);
-
-
         } catch (\Throwable $th) {
             $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
         }
@@ -376,6 +374,59 @@ class DispatchController extends Controller
                 'dispatch' => $dispatch,
                 'epBatch' => $epBatch,
                 'epPickupRate' => $epPickupRate
+            ],
+            'resultCode' => $resultCode
+        ];
+    }
+
+
+
+    public function cancelPickup(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $dispatch = null;
+        $epBatch = null;
+        $resultCode = null;
+
+
+        try {
+            GeneralHelper2::setEasyPostApiKey();
+
+            $dispatch = Dispatch::find($r->dispatchId);
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+            $epPickup = Pickup::retrieve($r->epPickupId);
+
+
+            EpBatchHelper::validateObjsForCancellingPickup($dispatch, $epBatch, $epPickup);
+
+            $epPickup->cancel();
+
+            // update dispatch
+            $newDispatchStatusCode = DispatchStatus::where('name', 'EP_BATCH_UPDATED')->get()[0]->code;
+            $dispatch->status_code = $newDispatchStatusCode;
+            $dispatch->pickup_cost = null;
+            $dispatch->save();
+
+
+            $isResultOk = true;
+
+
+            // Re-reference the updated objs.
+            $dispatch = new DispatchResource($dispatch);
+            $epBatch = Batch::retrieve($dispatch->ep_batch_id);
+            $epBatch = GeneralHelper2::pseudoJsonify($epBatch);
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'dispatch' => $dispatch,
+                'epBatch' => $epBatch
             ],
             'resultCode' => $resultCode
         ];

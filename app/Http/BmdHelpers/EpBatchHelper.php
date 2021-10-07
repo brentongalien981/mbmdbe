@@ -93,9 +93,10 @@ class EpBatchHelper
 
 
 
-    public static function validateObjsForBuyingPickup($epBatch, $epPickup)
+    public static function validateObjsForBuyingPickup($dispatch, $epBatch, $epPickup)
     {
         // check if dispatch, ep-batch, ep-pickup are all related
+        if (!$dispatch) { throw new Exception('Dispatch does not exist.'); }
         if (!$epBatch) { throw new Exception('Invalid EP-Batch'); }
         if (!$epPickup) { throw new Exception('Invalid EP-Pickup'); }
         if (!$epBatch->pickup || $epBatch->pickup->id !== $epPickup->id) { throw new Exception('Invalid EP-Pickup'); }
@@ -103,5 +104,16 @@ class EpBatchHelper
 
         // check if ep-pickup hasn’t been bought yet
         if ($epPickup->status === 'scheduled' || $epPickup->confirmation) { throw new Exception('EP-Pickup has already been bought.'); }
+    }
+
+
+
+    public static function validateObjsForCancellingPickup($dispatch, $epBatch, $epPickup)
+    {
+        // check if dispatch, ep-batch, ep-pickup are all related
+        if (!$dispatch) { throw new Exception('Dispatch does not exist.'); }
+        if (!$epBatch) { throw new Exception('Invalid EP-Batch'); }
+        if (!$epPickup) { throw new Exception('Invalid EP-Pickup'); }
+        if (!$epBatch->pickup || $epBatch->pickup->id !== $epPickup->id) { throw new Exception('Invalid EP-Pickup'); }
     }
 }
