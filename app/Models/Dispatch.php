@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Dispatch extends Model
 {
@@ -11,7 +12,8 @@ class Dispatch extends Model
 
 
 
-    public static function getAvailableDispatches() {
+    public static function getAvailableDispatches()
+    {
 
         $statuses = DispatchStatus::whereIn('name', ['EP_BATCH_CREATED', 'EP_BATCH_UPDATED'])->get()->pluck('code');
 
@@ -20,8 +22,37 @@ class Dispatch extends Model
 
 
 
-    public function orders() 
+    public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+
+
+    /**
+     * Update all the status and stats of all related orders, order-items, and inventory-items.
+     */
+    public function onSuccessfulDispatch()
+    {
+        $dipatchedOrderStatusCode = OrderStatus::getCodeByName('DISPATCHED');
+        $dipatchedOrderItemStatusCode = OrderItemStatus::getCodeByName('DISPATCHED');
+
+        foreach ($this->orders as $o) {
+            
+            // Update orders.    
+            $o->status_code = $dipatchedOrderStatusCode;
+            $o->save();
+
+            foreach ($o->orderItems as $oi) {
+
+                // Update order-items
+                $oldOrderItemStatusCode = $oi->status_code;
+                $oi->status_code = $dipatchedOrderItemStatusCode;
+                $oi->save();
+
+                // Update inventory-item.
+                $updatedInventoryItem = InventoryItem::updateStatsWithReferenceObj($oi, $oldOrderItemStatusCode);
+            }
+        }
     }
 }

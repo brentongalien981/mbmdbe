@@ -12,6 +12,7 @@ use App\Models\Dispatch;
 use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use App\Models\DispatchStatus;
+use Illuminate\Support\Facades\DB;
 use App\Bmd\Generals\GeneralHelper2;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Resources\OrderResource;
@@ -61,6 +62,7 @@ class DispatchController extends Controller
         $isResultOk = false;
         $resultCode = null;
         $dispatch = null;
+        $dispatchOrders = null;
 
 
         try {
@@ -68,19 +70,36 @@ class DispatchController extends Controller
             if (!$dispatch) {
                 throw new Exception('Dispatch Not Found.');
             }
-    
-    
-            $statusCode = DispatchStatus::where('code', $r->dispatchStatusCode)->get()[0]->code;    
+
+
+            $statusCode = DispatchStatus::where('code', $r->dispatchStatusCode)->get()[0]->code;
             if (!$statusCode) {
                 throw new Exception('Status Code Not Found.');
             }
+
+
             
-            
+            // Update dispatch.
+            DB::beginTransaction();
+
             $dispatch->status_code = $statusCode;
-            $dispatch->save();
-            $dispatch = new DispatchResource($dispatch);
+            $dispatch->save();            
+
+            $dispatchedStatus = DispatchStatus::where('name', 'DISPATCHED')->get()[0];
+            if ($statusCode == $dispatchedStatus->code) {
+                $dispatch->onSuccessfulDispatch();
+            }
+
+            DB::commit();
+
 
             $isResultOk = true;
+
+
+            //        
+            $dispatchOrders = OrderResource::collection($dispatch->orders) ?? null;
+            $dispatch = new DispatchResource($dispatch);
+
         } catch (\Throwable $th) {
             $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
         }
@@ -89,7 +108,8 @@ class DispatchController extends Controller
         return [
             'isResultOk' => $isResultOk,
             'objs' => [
-                'dispatch' => $dispatch
+                'dispatch' => $dispatch,
+                'dispatchOrders' => $dispatchOrders
             ],
             'resultCode' => $resultCode
 
@@ -477,7 +497,7 @@ class DispatchController extends Controller
     }
 
 
-    
+
     public function generateBatchLabels(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
@@ -496,7 +516,7 @@ class DispatchController extends Controller
 
             EpBatchHelper::validateObjsForGeneratingLabels($dispatch, $epBatch);
 
-            $epBatch->label(['file_format' => 'pdf']);            
+            $epBatch->label(['file_format' => 'pdf']);
 
             // update dispatch
             $newDispatchStatusCode = DispatchStatus::where('name', 'EP_BATCH_LABELS_GENERATED')->get()[0]->code;

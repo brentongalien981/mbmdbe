@@ -26,4 +26,10 @@ class OrderItemStatus extends Model
 
 
     protected $table = 'order_item_status';
+
+
+
+    public static function getCodeByName($name) {
+        return self::where('name', $name)->get()[0]->code;
+    }
 }
