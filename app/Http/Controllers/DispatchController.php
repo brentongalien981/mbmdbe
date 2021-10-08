@@ -475,4 +475,54 @@ class DispatchController extends Controller
             'resultCode' => $resultCode
         ];
     }
+
+
+    
+    public function generateBatchLabels(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $dispatch = null;
+        $epBatch = null;
+        $resultCode = null;
+
+
+        try {
+            GeneralHelper2::setEasyPostApiKey();
+
+            $dispatch = Dispatch::find($r->dispatchId);
+            $epBatch = Batch::retrieve($r->epBatchId);
+
+            EpBatchHelper::validateObjsForGeneratingLabels($dispatch, $epBatch);
+
+            $epBatch->label(['file_format' => 'pdf']);            
+
+            // update dispatch
+            $newDispatchStatusCode = DispatchStatus::where('name', 'EP_BATCH_LABELS_GENERATED')->get()[0]->code;
+            $dispatch->status_code = $newDispatchStatusCode;
+            $dispatch->save();
+
+
+            $isResultOk = true;
+
+
+            // Re-reference the updated objs.
+            $dispatch = new DispatchResource($dispatch);
+            $epBatch = Batch::retrieve($r->epBatchId);
+            $epBatch = GeneralHelper2::pseudoJsonify($epBatch);
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'dispatch' => $dispatch,
+                'epBatch' => $epBatch
+            ],
+            'resultCode' => $resultCode
+        ];
+    }
 }

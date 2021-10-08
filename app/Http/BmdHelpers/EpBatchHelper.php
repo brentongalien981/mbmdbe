@@ -116,4 +116,14 @@ class EpBatchHelper
         if (!$epPickup) { throw new Exception('Invalid EP-Pickup'); }
         if (!$epBatch->pickup || $epBatch->pickup->id !== $epPickup->id) { throw new Exception('Invalid EP-Pickup'); }
     }
+
+
+
+    public static function validateObjsForGeneratingLabels($dispatch, $epBatch)
+    {
+        // check if dispatch, ep-batch, ep-pickup are all related
+        if (!$dispatch) { throw new Exception('Dispatch does not exist.'); }
+        if (!$epBatch) { throw new Exception('Invalid EP-Batch'); }
+        if ($dispatch->ep_batch_id !== $epBatch->id) { throw new Exception('Dispatch and EP-Batch mismatch'); }
+    }
 }
