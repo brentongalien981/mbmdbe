@@ -54,6 +54,50 @@ class DispatchController extends Controller
 
 
 
+    public function update(Request $r)
+    {
+        Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
+
+        $isResultOk = false;
+        $resultCode = null;
+        $dispatch = null;
+
+
+        try {
+            $dispatch = Dispatch::find($r->dispatchId);
+            if (!$dispatch) {
+                throw new Exception('Dispatch Not Found.');
+            }
+    
+    
+            $statusCode = DispatchStatus::where('code', $r->dispatchStatusCode)->get()[0]->code;    
+            if (!$statusCode) {
+                throw new Exception('Status Code Not Found.');
+            }
+            
+            
+            $dispatch->status_code = $statusCode;
+            $dispatch->save();
+            $dispatch = new DispatchResource($dispatch);
+
+            $isResultOk = true;
+        } catch (\Throwable $th) {
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($th);
+        }
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'objs' => [
+                'dispatch' => $dispatch
+            ],
+            'resultCode' => $resultCode
+
+        ];
+    }
+
+
+
     public function index(Request $r)
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);

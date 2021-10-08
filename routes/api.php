@@ -112,6 +112,7 @@ Route::post('/dispatches/removeOrderFromDispatch', [DispatchController::class, '
 Route::post('/dispatches/saveEpBatchPickupInfo', [DispatchController::class, 'saveEpBatchPickupInfo'])->middleware('bmdauth');
 Route::post('/dispatches/buyPickupRate', [DispatchController::class, 'buyPickupRate'])->middleware('bmdauth');
 Route::post('/dispatches/cancelPickup', [DispatchController::class, 'cancelPickup'])->middleware('bmdauth');
+Route::post('/dispatches/update', [DispatchController::class, 'update'])->middleware('bmdauth');
 
 
 
