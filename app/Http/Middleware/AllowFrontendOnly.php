@@ -20,6 +20,11 @@ class AllowFrontendOnly
         $frontendUrl = $theHeaders['Origin'] ?? null;
         $frontendUrl = substr($frontendUrl, 0, strlen(env('APP_FRONTEND_URL'))); // BMD-ON-STAGING
 
+        if (env('APP_ENV') === 'testing') {
+            return $next($request);
+        }
+
+        
         if (
             isset($frontendUrl)
             && $frontendUrl === env('APP_FRONTEND_URL')
