@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 
+use function PHPUnit\Framework\isEmpty;
+
 class AuthController extends Controller
 {
     public const LOGIN_RESULT_CODE_INVALID_PASSWORD = -1;
@@ -79,6 +81,8 @@ class AuthController extends Controller
         ]);
 
         $possibleUser = User::where('email', $v['email'])->get()[0];
+        if (!$possibleUser) { abort(403, 'User not found'); }        
+        if (!isset($possibleUser->roles) || count($possibleUser->roles) === 0) { abort(403, 'Non-manager User!'); }
 
         $isResultOk = false;
         $bmdAuth = null;
