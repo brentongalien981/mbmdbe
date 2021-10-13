@@ -25,10 +25,6 @@ class BmdAuth
             return $next($request);
         }
 
-        if (env('APP_ENV') === 'testing') {
-            return $next($request);
-        }
-
 
         return response("BmdAuth: You're unauthenticated dude.", 401);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Bmd\Generals\GeneralHelper2;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -17,17 +18,14 @@ class AllowFrontendOnly
     public function handle(Request $request, Closure $next)
     {
         $theHeaders = getallheaders();
+        $envFrontendUrl = GeneralHelper2::getAppFrontendUrl();
         $frontendUrl = $theHeaders['Origin'] ?? null;
-        $frontendUrl = substr($frontendUrl, 0, strlen(env('APP_FRONTEND_URL'))); // BMD-ON-STAGING
-
-        if (env('APP_ENV') === 'testing') {
-            return $next($request);
-        }
+        $frontendUrl = substr($frontendUrl, 0, strlen($envFrontendUrl)); // BMD-ON-STAGING
 
         
         if (
             isset($frontendUrl)
-            && $frontendUrl === env('APP_FRONTEND_URL')
+            && $frontendUrl === $envFrontendUrl
         ) {
             return $next($request);
         }
