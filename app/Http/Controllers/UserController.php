@@ -51,6 +51,7 @@ class UserController extends Controller
 
         $overallProcessLogs[] = '';
         $isResultOk = false;
+        $bmdAuth = null;
 
         try {
 
@@ -107,9 +108,9 @@ class UserController extends Controller
             'isResultOk' => $isResultOk,
             'overallProcessLogs' => $overallProcessLogs, // BMD-ON-STAGING
             'objs' => [
-                'bmdToken' => $bmdAuth->token,
-                'bmdRefreshToken' => $bmdAuth->refresh_token,
-                'expiresIn' => $bmdAuth->expires_in
+                'bmdToken' => $bmdAuth->token ?? null,
+                'bmdRefreshToken' => $bmdAuth->refresh_token ?? null,
+                'expiresIn' => $bmdAuth->expires_in ?? null
             ],
         ];
     }

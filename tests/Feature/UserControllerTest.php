@@ -48,19 +48,13 @@ class UserControllerTest extends TestCase
         //     $mock->shouldReceive('create')->once()->andReturn(true);
         // });
 
-
-
-        // // $response = $this->get('/');
+        
         // $response = $this->post('/api/users/create', [
         //     'bmdToken' => 'abcdefg8a9a98a',
         //     'authProviderId' => 1,
         //     'email' => 'test@test.com',
         //     'password' => 'abcd1234',
         //     'selectedRoleIds' => [$r1->id]
-        // ]);
-
-        // $response = $this->json('post', '/api/users/create', [
-        //     'email' => 'test@test.com'
         // ]);
 
 
