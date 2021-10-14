@@ -4,6 +4,7 @@ namespace App\Events;
 
 use App\Bmd\Constants\BmdExceptions;
 use App\Bmd\Constants\BmdGlobalConstants;
+use App\Listeners\HandleGenerateOPIsEvent;
 use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -46,13 +47,35 @@ class GenerateOPIsEvent
         $ithDayOfTheYearForStartDate = getdate(strtotime($commandData['dateFrom']))['yday'];
         $ithDayOfTheYearForEndDate = getdate(strtotime($commandData['dateTo']))['yday'];
 
-        $periodDays = $ithDayOfTheYearForEndDate - $ithDayOfTheYearForStartDate;        
-        $max = $commandData['maxBaseNumOfDailyOrders'];
+        $periodDays = $ithDayOfTheYearForEndDate - $ithDayOfTheYearForStartDate + 1;        
+        $maxNumOfDailyOrders = $commandData['maxBaseNumOfDailyOrders'];
 
-        if (($periodDays * $max) > BmdGlobalConstants::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK) {
+        // Basic guard.
+        if (($periodDays * $maxNumOfDailyOrders) > BmdGlobalConstants::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK) {
             $exceptionMsg = 'BMD Exception: ' . BmdExceptions::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK['id'];
             $exceptionMsg .= ' => ' . BmdExceptions::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK['name'];
             throw new Exception($exceptionMsg);
+        }
+
+
+
+        // Detailed guard.
+        $totalProjectedOrders = 0;
+        $numOfDaysInSelectedPeriod = HandleGenerateOPIsEvent::getNumOfDaysInPeriod($commandData['trendPeriod']);
+
+        // $numOfDayLeft is the remaining days from start to finish of OPI generation.
+
+        for ($numOfDayLeft = $periodDays; $numOfDayLeft > 0; $numOfDayLeft -= $numOfDaysInSelectedPeriod) { 
+            $totalProjectedOrders += $numOfDaysInSelectedPeriod * $maxNumOfDailyOrders;
+
+            if ($totalProjectedOrders > BmdGlobalConstants::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK) {
+                $exceptionMsg = 'BMD Exception: ' . BmdExceptions::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK['id'];
+                $exceptionMsg .= ' => ' . BmdExceptions::MAX_NUM_OF_FAKE_ORDERS_TO_BE_GENERATED_PER_SCHEDULED_TASK['name'];
+                throw new Exception($exceptionMsg);
+            }
+
+            $percent = $commandData['trendChangePercentage'];
+            $maxNumOfDailyOrders *= (1.0 + ($percent / 100.0));
         }
     }
 

@@ -161,7 +161,7 @@ class HandleGenerateOPIsEvent implements ShouldQueue
         $this->numDaysForOrderCreation = $ithDayOfTheYearForEndDate - $ithDayOfTheYearForStartDate + 1;
 
         $maxBaseNumOfDailyOrders = $d['maxBaseNumOfDailyOrders'];
-        $numOfDaysInPeriod = $this->getNumOfDaysInPeriod($d['trendPeriod']);
+        $numOfDaysInPeriod = self::getNumOfDaysInPeriod($d['trendPeriod']);
         $maxNumOrdersForCurrentPeriod = $maxBaseNumOfDailyOrders;
 
 
@@ -195,7 +195,7 @@ class HandleGenerateOPIsEvent implements ShouldQueue
 
 
 
-    private function getNumOfDaysInPeriod($trendPeriod)
+    public static function getNumOfDaysInPeriod($trendPeriod)
     {
         switch ($trendPeriod) {
             case GenerateOPIsEvent::TREND_PERIOD_OPTION_DAILY:

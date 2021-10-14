@@ -75,6 +75,7 @@ class ScheduledTaskController extends Controller
         $isResultOk = false;
         $resultCode = 0;
 
+        
         $scheduledTask = ScheduledTask::find($r->jobId)->get()[0];
         $availableStatus = ScheduledTaskStatus::where('name', 'AVAILABLE')->get()[0];
 
@@ -85,7 +86,6 @@ class ScheduledTaskController extends Controller
         ];
 
         $event = null;
-
 
         if ($scheduledTask->status_code == $availableStatus->code) {
             switch ($r->jobId) {
