@@ -42,6 +42,22 @@ class GenerateOPIsEvent
 
 
 
+    public static function guardForProductionEnv() {
+
+        $appEnv = env('APP_ENV');
+
+        switch ($appEnv) {
+            case 'staging':
+            case 'production':
+            case 'deployment':
+                $exceptionMsg = 'BMD Exception: Command Not Allowed In Production Mode';
+                throw new Exception($exceptionMsg);
+                break;
+        }
+    }
+
+
+
     public static function guardTooManyOrdersToBeCreated($commandData)
     {
         $ithDayOfTheYearForStartDate = getdate(strtotime($commandData['dateFrom']))['yday'];

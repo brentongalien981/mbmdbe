@@ -75,7 +75,7 @@ class ScheduledTaskController extends Controller
         $isResultOk = false;
         $resultCode = 0;
 
-        
+
         $scheduledTask = ScheduledTask::find($r->jobId)->get()[0];
         $availableStatus = ScheduledTaskStatus::where('name', 'AVAILABLE')->get()[0];
 
@@ -100,6 +100,7 @@ class ScheduledTaskController extends Controller
                     break;
                 case ScheduledTask::where('command_signature', 'GenerateOPIs:Execute')->get()[0]->id:
                     $commandData = GenerateOPIsEvent::extractCommandValidatedData($r);
+                    GenerateOPIsEvent::guardForProductionEnv();
                     GenerateOPIsEvent::guardTooManyOrdersToBeCreated($commandData);
                     $event = GenerateOPIsEvent::class;
                     break;
