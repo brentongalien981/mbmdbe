@@ -1,0 +1,26 @@
+// Setup the private Docker Hub repository.
+// BMD-ON-PRESTAGING: TODO
+
+
+// Build image locally.
+docker build --tag odox700/mbmdbe:prestaging-1.0 --file my-docker-stuffs/prestaging/mbmdbe.prestaging.dockerfile .
+
+
+
+// Locally, push the image to Docker Hub.
+docker push odox700/mbmdbe:prestaging-1.0
+
+
+// Set the .env FILE on the server.
+
+
+// On the server, pull the image.
+docker pull odox700/mbmdbe:prestaging-1.0
+
+
+// Run container locally.
+docker run -dtp 9001:80 --env-file my-envs/.env odox700/mbmdbe:prestaging-1.0
+
+
+// Run Swarm Service
+docker service create --replicas 6 -tp 9002:80 --env-file my-envs/.env odox700/mbmdbe:prestaging-1.0
