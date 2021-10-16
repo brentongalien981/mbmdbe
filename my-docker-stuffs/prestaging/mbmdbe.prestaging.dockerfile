@@ -27,7 +27,7 @@ COPY . .
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 COPY ./my-shell-scripts/set-prestaging-env.sh .
-RUN chmod 777 set-env.test.sh
+RUN chmod 777 set-prestaging-env.sh
 
 
 RUN php artisan passport:keys
