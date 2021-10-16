@@ -134,14 +134,15 @@ Route::post('/shipping/buyShippingLabel', [ShippingController::class, 'buyShippi
 // BMD-FOR-DEBUG
 // fruitcake/laravel-cors middleware setup.
 // BMD-ON-STAGING: Comment-out.
+// BMD-ON-PRESTAGING: Comment-out because route:cache gets error with callbacks.
 // BMD-TAGS: test, testing, debug, tinker, cors, http, https, auth
-Route::get('/test', function (Request $request) {
-    return [
-        'isResultOk' => true,
-        'url' => '/test',
-        'comment' => 'random shit bruh'
-    ];
-});
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::get('/test', function (Request $request) {
+//     return [
+//         'isResultOk' => true,
+//         'url' => '/test',
+//         'comment' => 'random shit bruh'
+//     ];
+// });
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });

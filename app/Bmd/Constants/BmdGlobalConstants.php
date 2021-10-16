@@ -5,6 +5,11 @@ namespace App\Bmd\Constants;
 
 class BmdGlobalConstants
 {
+
+    // BMD-ON-PRESTAGING, BMD-ON-STAGING, BMD-ON-DEPLOYMENT
+    // Set the env file.
+
+
     // BMD-ON-STAGING
     // public const WEBSITE = 'https://mbmd.com';
     public const BMD_SELLER_NAME = 'ASB Inc.';
