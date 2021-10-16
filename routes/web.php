@@ -16,10 +16,12 @@ use App\Http\Controllers\MyTestController;
 */
 
 
+// BMD-ON-STAGING: Comment-out
 Route::get('/test', [MyTestController::class, 'read']);
+Route::get('/mytest/get-http-info', [MyTestController::class, 'getHttpInfo']);
 
 
-
-Route::get('/', function () {
-    return view('welcome');
-});
+// BMD-ON-STAGING: Comment-out
+// Route::get('/', function () {
+//     return view('welcome');
+// });

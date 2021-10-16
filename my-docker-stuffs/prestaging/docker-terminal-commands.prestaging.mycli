@@ -11,7 +11,7 @@ docker build --tag odox700/mbmdbe:prestaging-1.0 --file my-docker-stuffs/prestag
 docker push odox700/mbmdbe:prestaging-1.0
 
 
-// Set the .env FILE on the server.
+// Set the .env FILE on the server / locally / ECS.
 
 
 // On the server, pull the image.
