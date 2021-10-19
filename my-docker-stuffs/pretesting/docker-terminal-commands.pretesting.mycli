@@ -19,7 +19,7 @@ docker pull odox700/mbmdbe:pretesting-1.0
 
 
 // Run container locally.
-docker run -dtp 9001:80 --env-file my-envs/.env.pretesting odox700/mbmdbe:pretesting-1.0
+docker run -dtp 9002:80 --env-file my-envs/.env.pretesting odox700/mbmdbe:pretesting-1.0
 
 
 // Run Swarm Service
