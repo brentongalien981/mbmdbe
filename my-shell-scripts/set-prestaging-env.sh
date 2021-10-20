@@ -78,7 +78,7 @@ echo "PASSPORT_GRANT_PASSWORD_CLIENT_SECRET=${PASSPORT_GRANT_PASSWORD_CLIENT_SEC
 echo "WEB_DOCUMENT_ROOT=${WEB_DOCUMENT_ROOT}" >> .env
 
 
-# In order for this line to work, the last command "php artisan config:clear" should be uncommented and run.
+# NOTE: In order for this line to work, the last command "php artisan config:clear" should be uncommented and run.
 echo "MY_RANDOM_CONTAINER_NUMBER=${RANDOM}" >> .env
 
 
@@ -95,6 +95,7 @@ echo "\"" >> .env
 echo "FILE: .env has been set."
 
 
+echo "Changing file ownerships..."
 chown -R application:application .
 
 echo "File ownerships have been set."
@@ -102,7 +103,12 @@ echo "##################### END MY SHIT ####################"
 
 
 
+echo "Caching Laravel stuffs..."
+
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 # php artisan config:clear
+
+
+echo "Laravel stuffs cached!"
