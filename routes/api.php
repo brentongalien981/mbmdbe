@@ -133,7 +133,7 @@ Route::post('/shipping/buyShippingLabel', [ShippingController::class, 'buyShippi
 
 /* test */
 // BMD-FOR-DEBUG
-Route::get('/mytest/get-http-info2', [MyTestController::class, 'getHttpInfo2']);
+// Route::get('/mytest/get-http-info2', [MyTestController::class, 'getHttpInfo2']);
 // fruitcake/laravel-cors middleware setup.
 // BMD-ON-STAGING: Comment-out.
 // BMD-ON-PRESTAGING: Comment-out because route:cache gets error with callbacks.

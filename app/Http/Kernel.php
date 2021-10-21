@@ -42,8 +42,7 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // BMD-TODO
-            // 'allow-frontend-only'
+            'allow-frontend-only'
         ],
     ];
 

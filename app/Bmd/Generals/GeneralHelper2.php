@@ -74,7 +74,7 @@ class GeneralHelper2
             case 'deployment':
                 return env('APP_FRONTEND_URL_FOR_DEPLOYMENT');
             default:
-                return env('APP_FRONTEND_URL_FOR_DEVELOPMENT');
+                return env('APP_FRONTEND_URL');
         }
     }
 }
