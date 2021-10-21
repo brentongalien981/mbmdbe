@@ -3,20 +3,21 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DailySummaryController;
-use App\Http\Controllers\DispatchController;
-use App\Http\Controllers\DispatchStatusController;
-use App\Http\Controllers\OrderController;
-use App\Http\Controllers\OrderItemController;
-use App\Http\Controllers\OrderStatusController;
-use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\PurchaseItemController;
-use App\Http\Controllers\PurchaseStatusController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ScheduledTaskController;
-use App\Http\Controllers\ScheduledTaskLogController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\MyTestController;
+use App\Http\Controllers\DispatchController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\OrderItemController;
+use App\Http\Controllers\OrderStatusController;
+use App\Http\Controllers\DailySummaryController;
+use App\Http\Controllers\PurchaseItemController;
+use App\Http\Controllers\ScheduledTaskController;
+use App\Http\Controllers\DispatchStatusController;
+use App\Http\Controllers\PurchaseStatusController;
+use App\Http\Controllers\ScheduledTaskLogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,6 +133,7 @@ Route::post('/shipping/buyShippingLabel', [ShippingController::class, 'buyShippi
 
 /* test */
 // BMD-FOR-DEBUG
+Route::get('/mytest/get-http-info2', [MyTestController::class, 'getHttpInfo2']);
 // fruitcake/laravel-cors middleware setup.
 // BMD-ON-STAGING: Comment-out.
 // BMD-ON-PRESTAGING: Comment-out because route:cache gets error with callbacks.
