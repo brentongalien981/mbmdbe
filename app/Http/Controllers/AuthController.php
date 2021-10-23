@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\BmdHttpResponseCodes\GeneralHttpResponseCodes;
 use Exception;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\BmdAuth;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\AuthProviderType;
 use Illuminate\Support\Facades\DB;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-
 use function PHPUnit\Framework\isEmpty;
 
 class AuthController extends Controller
@@ -140,6 +143,7 @@ class AuthController extends Controller
             }
         } catch (Exception $e) {
             $overallProcessLogs[] = 'BMD CaughtError: ' . $e->getMessage();
+            // $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($e);
             $bmdAuth = null;
         }
 
@@ -155,7 +159,80 @@ class AuthController extends Controller
                 'bmdRefreshToken' => $bmdAuth ? $bmdAuth->refresh_token : null,
                 'expiresIn' => $bmdAuth ? $bmdAuth->expires_in : null,
                 'authProviderId' => $bmdAuth ? $bmdAuth->auth_provider_type_id : null
-            ],
+            ]
+        ];
+    }
+
+
+    
+    public function loginAsDemoUser(Request $r) 
+    {
+        if (env('APP_ENV') === 'production') {
+            throw new Exception('Not Allowed In Production Mode!');
+        }
+
+        
+        $isResultOk = false;
+        $resultCode = 0;
+        $bmdAuth = null;
+        $randomEmail = 'manager' . Str::random(10) . '@asbdev.com';
+
+        try {
+            
+            DB::beginTransaction();
+            
+            $randomPassword = Str::random(16);
+
+            $user = User::create([
+                'email' => $randomEmail,
+                'password' => Hash::make($randomPassword),
+            ]);
+
+
+            $oauthProps = self::createPasswordAccessPassportToken($randomEmail, $randomPassword, $r);
+
+
+            // Create BmdAuth obj.
+            $bmdAuth = new BmdAuth();
+            $bmdAuth->user_id = $user->id;
+            $bmdAuth->token = $oauthProps['access_token'];
+            $bmdAuth->refresh_token = $oauthProps['refresh_token'];
+            $bmdAuth->expires_in = getdate()[0] + BmdAuth::NUM_OF_SECS_PER_MONTH;
+            $bmdAuth->frontend_pseudo_expires_in = $bmdAuth->expires_in;
+            $bmdAuth->auth_provider_type_id = AuthProviderType::BMD;
+            $bmdAuth->save();
+
+            $bmdAuth->saveToCache();
+
+
+            // Associate user roles.
+            $allRoledIds = Role::all()->pluck('id')->toArray();
+            $user->roles()->sync($allRoledIds);
+
+
+            DB::commit();
+
+            $resultCode = self::LOGIN_RESULT_CODE_SUCCESS;
+            $isResultOk = true;
+
+        } catch (Exception $e) {            
+            DB::rollBack();
+            $bmdAuth = null;
+            $resultCode = GeneralHttpResponseCodes::getGeneralExceptionCode($e);
+        }
+
+
+
+        return [
+            'isResultOk' => $isResultOk,
+            'resultCode' => $resultCode,
+            'objs' => [
+                'email' => $randomEmail,
+                'bmdToken' => $bmdAuth ? $bmdAuth->token : null,
+                'bmdRefreshToken' => $bmdAuth ? $bmdAuth->refresh_token : null,
+                'expiresIn' => $bmdAuth ? $bmdAuth->expires_in : null,
+                'authProviderId' => $bmdAuth ? $bmdAuth->auth_provider_type_id : null
+            ]
         ];
     }
 }

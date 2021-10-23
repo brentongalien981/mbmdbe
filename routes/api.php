@@ -34,6 +34,7 @@ use App\Http\Controllers\ScheduledTaskLogController;
 
 /** auth */
 Route::post('/auth/signIn', [AuthController::class, 'signIn']);
+Route::post('/auth/loginAsDemoUser', [AuthController::class, 'loginAsDemoUser']);
 
 
 

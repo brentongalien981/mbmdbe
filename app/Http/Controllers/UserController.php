@@ -117,7 +117,7 @@ class UserController extends Controller
 
 
 
-    private static function createPasswordAccessPassportToken($email, $password, $request)
+    public static function createPasswordAccessPassportToken($email, $password, $request)
     {
         $request->request->add([
             'grant_type' => 'password',
