@@ -22,7 +22,12 @@ class AllowFrontendOnly
         $frontendUrl = $theHeaders['Origin'] ?? null;
         $frontendUrl = substr($frontendUrl, 0, strlen($envFrontendUrl)); // BMD-ON-STAGING
 
+        // For bmdworker, disregard the middleware.
+        if (env('APP_SUBNAME', '') === 'bmdworker') {
+            return $next($request);
+        }
         
+
         if (
             isset($frontendUrl)
             && $frontendUrl === $envFrontendUrl
