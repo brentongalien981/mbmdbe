@@ -29,7 +29,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        // $schedule->command(ChangeTestRoleDescriptionCommand::class);
+        $schedule->command(ChangeTestRoleDescriptionCommand::class)->everyMinute();
         $schedule->command(PrepareBmdPurchasesCommand::class)->dailyAt(PrepareBmdPurchasesCommand::scheduledDispatchTime);
         $schedule->command(ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsCommand::class)->dailyAt(ResetSizeAvailabilityQuantitiesOfNonBmdSellerProductsCommand::scheduledDispatchTime);
         $schedule->command(SyncBmdSellerProductsWithInventoryCommand::class)->dailyAt(SyncBmdSellerProductsWithInventoryCommand::scheduledDispatchTime);
