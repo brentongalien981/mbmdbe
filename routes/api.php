@@ -130,6 +130,11 @@ Route::post('/shipping/buyShippingLabel', [ShippingController::class, 'buyShippi
 
 
 
+/** ep-webhook */
+Route::post('/receive-event', [EpWebhookController::class, 'receiveEvent']);
+
+
+
 
 
 /* test */

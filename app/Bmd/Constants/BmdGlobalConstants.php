@@ -43,6 +43,9 @@ class BmdGlobalConstants
     public const EMAIL_SENDER_FOR_ORDER_RECEIVED = 'no-reply@asbdev.com';
     public const EMAIL_FOR_ORDER_EMAILS_TRACKER = 'bren.baga@asbdev.com'; // Maybe change this to orderemailstracker@bmd.com
     public const EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS = 'bren.baga@asbdev.com';
+    // BMD-ON-ITER: Staging: Set this to the dispatch-manager's email.
+    public const EMAIL_RECIPIENT_FOR_EP_BATCH_UPDATES = 'bren.baga@asbdev.com';
+    public const EMAIL_SENDER_FOR_EP_BATCH_UPDATES = 'epbatchupdates@asbdev.com';
 
 
 
@@ -51,6 +54,7 @@ class BmdGlobalConstants
     public const QUEUE_FOR_EMAILING_ORDER_DETAILS = 'TestBmd-QEmailUserOrderDetails';
     public const QUEUE_FOR_HANDLING_MANUAL_SCHEDULED_TASK_DISPATCHES = 'MBMDBE-ManualScheduledTaskDispatchQ';
     public const QUEUE_FOR_HANDLING_LONG_MANUAL_SCHEDULED_TASK_DISPATCHES = 'MBMDBE-LongManualScheduledTaskDispatchQ';
+    public const QUEUE_FOR_EP_WEBHOOKS = 'BMDW-EpWebhookQ';
 
 
 
@@ -85,5 +89,12 @@ class BmdGlobalConstants
         'country' => 'CA',
         'zip' => 'M4H1K4',
         'phone' => '4164604026'
+    ];
+
+
+
+    public const EP_EVENT_DESCRIPTIONS = [
+        'BATCH_CREATED' => 'batch.created',
+        'BATCH_UPDATED' => 'batch.updated'
     ];
 }

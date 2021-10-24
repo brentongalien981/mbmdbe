@@ -49,6 +49,16 @@ class Order extends Model
 
 
 
+    public static function getReadableDate($dateTime)
+    {
+        $d = getdate(strtotime($dateTime));
+
+        $str = $d['weekday'] . ', ' . $d['month'] . ' ' . $d['mday'] . ', ' . $d['year'];
+        return $str;
+    }
+
+
+
     public static function getOrdersByInclusivePeriod($from, $to)
     {
         $to .= ' 23:59:59';
