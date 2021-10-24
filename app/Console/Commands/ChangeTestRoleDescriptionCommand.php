@@ -43,7 +43,7 @@ class ChangeTestRoleDescriptionCommand extends Command
             $str .= rand(0, 100) . '-';
         }
 
-        $r = Role::find(6);
+        $r = Role::find(1);
         $r->description = $str;
         $r->save();
         
