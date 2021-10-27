@@ -2,7 +2,7 @@
 // BMD-ON-PRESTAGING: TODO
 
 
-// Build image locally.
+// Build Docker Hub image.
 docker build --tag odox700/mbmdbe:prestaging-1.0 --file my-docker-stuffs/prestaging/mbmdbe.prestaging.dockerfile .
 
 
