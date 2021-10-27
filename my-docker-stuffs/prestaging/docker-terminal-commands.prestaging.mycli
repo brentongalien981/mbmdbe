@@ -3,6 +3,7 @@
 
 
 // Build Docker Hub image.
+// NOTE: You mignt need --no-cache flag.
 docker build --tag odox700/mbmdbe:prestaging-1.0 --file my-docker-stuffs/prestaging/mbmdbe.prestaging.dockerfile .
 
 
