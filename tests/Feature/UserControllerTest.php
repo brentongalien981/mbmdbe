@@ -2,62 +2,84 @@
 
 namespace Tests\Feature;
 
-use App\Http\BmdHelpers\BmdAuthProvider;
-use App\Http\Middleware\BmdAuth;
+use App\Models\AuthProviderType;
 use Tests\TestCase;
 use App\Models\Role;
 use App\Models\User;
-use App\Policies\UserPolicy;
-use Mockery\MockInterface;
+use App\Models\BmdAuth;
+use Database\Seeders\RoleSeeder;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Gate;
 
 class UserControllerTest extends TestCase
 {
-    // use RefreshDatabase;
+    use RefreshDatabase;
+
+
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutExceptionHandling();
+        $this->initRandomUser();
+        $this->setRandomUserManagerUser();
+    }
 
 
 
     /** @test */
     public function it_creates_user()
-    {
-        // $this->withoutExceptionHandling();
+    {       
 
-        // // Test roles
-        // $r1 = new Role();
-        // $r1->name = 'TestRole';
-        // $r1->save();        
+        $orderManagerRole = Role::where('name', 'OrderManager')->get()[0];
 
 
-        // Gate::shouldReceive('forUser')->once();
-        // Gate::shouldReceive('authorize')->once();        
+        $response = $this->post('/api/users/create', [
+            'bmdToken' => $this->sampleUserManagerBmdAuth->token,
+            'authProviderId' => $this->sampleUserManagerBmdAuth->auth_provider_type_id,
+            'email' => 'test@test.com',
+            'password' => 'abcd1234',
+            'selectedRoleIds' => [$orderManagerRole->id]
+        ]);
+
+        $createdUser = User::where('email', 'test@test.com')->get()[0];
 
 
-        // $mock = $this->mock(BmdAuthProvider::class, function ($mock) {
-        //     // $mock->shouldReceive('setInstance')->once();
-        //     // $mock->shouldReceive('check')->once()->andReturn(true);
+        $response->assertSee('isResultOk');
+        $response->assertSee('bmdToken');
+        $response->assertSee('bmdRefreshToken');
+        $response->assertSee('expiresIn');
+        $this->assertDatabaseHas('users', ['email' => $createdUser->email]);
+        $this->assertDatabaseHas('bmd_auths', ['token' => $createdUser->bmdAuth->token]);
 
-        //     $testUser = User::factory()->create();
-
-        //     $mock->shouldReceive('user')->once()->andReturn($testUser);
-        // });
-
-
-        // $mockedUserPolicy = $this->mock(UserPolicy::class, function ($mock) {
-        //     $mock->shouldReceive('create')->once()->andReturn(true);
-        // });
-
-        
-        // $response = $this->post('/api/users/create', [
-        //     'bmdToken' => 'abcdefg8a9a98a',
-        //     'authProviderId' => 1,
-        //     'email' => 'test@test.com',
-        //     'password' => 'abcd1234',
-        //     'selectedRoleIds' => [$r1->id]
-        // ]);
-
-
-        // $response->assertSee('pussy');
     }
+
+
+
+    /** @test */
+    public function it_creates_user_with_json_assertions()
+    {
+
+        $orderManagerRole = Role::where('name', 'OrderManager')->get()[0];
+
+
+        $response = $this->postJson('/api/users/create', [
+            'bmdToken' => $this->sampleUserManagerBmdAuth->token,
+            'authProviderId' => $this->sampleUserManagerBmdAuth->auth_provider_type_id,
+            'email' => 'test@test.com',
+            'password' => 'abcd1234',
+            'selectedRoleIds' => [$orderManagerRole->id]
+        ]);
+
+        $response
+            ->assertStatus(200)
+            ->assertJson([
+                'isResultOk' => true
+            ]);
+
+        $this->assertEquals(1, User::where('email', 'test@test.com')->get()->count());
+    }
+
 }
