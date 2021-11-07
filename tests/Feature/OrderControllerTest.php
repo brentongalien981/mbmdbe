@@ -6,8 +6,9 @@ use Tests\TestCase;
 use App\Models\Role;
 use App\Models\Order;
 use App\Bmd\Generals\GeneralHelper2;
-use App\Providers\BmdAuthProvider;
+// use App\Providers\BmdAuthProvider;
 use Database\Seeders\OrderStatusSeeder;
+use App\Http\BmdHelpers\BmdAuthProvider;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

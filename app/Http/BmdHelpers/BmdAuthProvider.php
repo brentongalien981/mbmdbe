@@ -77,4 +77,11 @@ class BmdAuthProvider
     {
         return self::$instance;
     }
+
+
+
+    public static function _forTestingOnly_unsetInstance()
+    {
+        self::$instance = null;
+    }
 }
