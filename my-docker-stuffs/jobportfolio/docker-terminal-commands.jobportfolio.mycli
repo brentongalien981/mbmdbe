@@ -1,0 +1,28 @@
+// Setup the private Docker Hub repository.
+// BMD-ON-jobportfolio: TODO
+
+
+// Build Docker Hub image.
+// NOTE: You mignt need --no-cache flag.
+docker build --tag odox700/mbmdbe:jobportfolio-1.0 --file my-docker-stuffs/jobportfolio/mbmdbe.jobportfolio.dockerfile .
+
+
+
+// Locally, push the image to Docker Hub.
+docker push odox700/mbmdbe:jobportfolio-1.0
+
+
+// Set the .env FILE on the server / locally / ECS.
+
+
+// On the server, pull the image.
+docker pull odox700/mbmdbe:jobportfolio-1.0
+
+
+// Run container locally.
+docker run -dtp 9002:80 --env-file my-envs/.env.mbmdbe.jobportfolio odox700/mbmdbe:prestaging-1.0
+
+
+
+// Run Swarm Service
+docker service create --replicas 6 -tp 9002:80 --env-file my-envs/.env odox700/mbmdbe:jobportfolio-1.0
