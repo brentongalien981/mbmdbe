@@ -18,6 +18,7 @@ use App\Http\Controllers\MyTestController;
 
 // BMD-ON-STAGING: Comment-out
 Route::get('/test', [MyTestController::class, 'read']);
+Route::get('/getSumOfTwoHighestNums', [MyTestController::class, 'getSumOfTwoHighestNums']);
 Route::get('/mytest/get-http-info', [MyTestController::class, 'getHttpInfo']);
 
 
