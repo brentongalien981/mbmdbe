@@ -6,6 +6,7 @@ namespace App\Http\BmdHelpers;
 
 class BmdOperationsTimeManager
 {
+    // BMD-ON-ITER: PRESTAGING, STAGING, PRODUCTION, DEPLOYMENT: Edit this.
     private const DAILY_PURCHASE_BUYING_TIME = ['hours' => 10, 'minutes' => 0, 'seconds' => 0];
 
 

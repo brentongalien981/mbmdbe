@@ -96,6 +96,7 @@ class Order extends Model
 
     public function updateStatusBasedOnOrderItemsStatuses()
     {
+        if (!$this->canUpdateStatusBasedOnOrderItemsStatuses()) { return; }
 
         $orderItems = $this->orderItems;
         $numOfOrderItems = count($orderItems);
@@ -120,6 +121,25 @@ class Order extends Model
         }
 
         $this->save();
+    }
+
+
+
+    public function canUpdateStatusBasedOnOrderItemsStatuses()
+    {
+        $allowedOrderStatuses = OrderStatus::whereIn('name', [
+            'ORDER_CONFIRMED',
+            'ORDER_DETAILS_EMAILED_TO_USER',
+            'BEING_EVALUATED_FOR_PURCHASE',
+            'EVALUATED_INCOMPLETELY_FOR_PURCHASE',                        
+        ])->get()->pluck('code');
+
+
+        if (in_array($this->status_code, $allowedOrderStatuses)) {
+            return true;
+        }
+
+        return false;
     }
 
 
