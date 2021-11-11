@@ -46,9 +46,7 @@ class ShippingController extends Controller
 
         $isResultOk = false;
 
-
-        // BMD-ON-ITER: Development, Staging
-        EasyPost::setApiKey(env('EASYPOST_TK'));
+        GeneralHelper2::setEasyPostApiKey();
 
 
 
@@ -124,8 +122,7 @@ class ShippingController extends Controller
 
         try {
 
-            // BMD-ON-ITER: Development, Staging
-            EasyPost::setApiKey(env('EASYPOST_TK'));
+            GeneralHelper2::setEasyPostApiKey();
 
             // Reference order.
             $entireProcessData['order'] = Order::findOrFail($r->orderId);

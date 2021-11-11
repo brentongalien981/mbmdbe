@@ -32,8 +32,7 @@ class DispatchController extends Controller
     {
         Gate::forUser(BmdAuthProvider::user())->authorize('mbmdDoAny', Dispatch::class);
 
-        // BMD-ON-ITER: Staging
-        EasyPost::setApiKey(env('EASYPOST_TK'));
+        GeneralHelper2::setEasyPostApiKey();
 
         $batch = Batch::create();
 

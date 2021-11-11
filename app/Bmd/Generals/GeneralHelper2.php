@@ -50,8 +50,8 @@ class GeneralHelper2
             case 'deployment':
                 // BMD-ON-ITER: Staging, Deployment, Production:
                 // Comment this out.
-                throw new Exception('Trying to use EP-PK');
-                // $apiKey = env('EASYPOST_PK');
+                // throw new Exception('Trying to use EP-PK');
+                $apiKey = env('EASYPOST_PK');
                 break;
         }
 
