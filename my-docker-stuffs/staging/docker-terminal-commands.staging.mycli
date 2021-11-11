@@ -1,0 +1,28 @@
+// Setup the private Docker Hub repository.
+// xxx
+
+
+// Build Docker Hub image.
+// NOTE: You mignt need --no-cache flag.
+docker build --no-cache --tag odox700/mbmdbe:staging-1.0 --file my-docker-stuffs/staging/mbmdbe.staging.dockerfile .
+
+
+
+// Locally, push the image to Docker Hub.
+docker push odox700/mbmdbe:staging-1.0
+
+
+// Set the .env FILE on the server / locally / ECS.
+
+
+// On the server, pull the image.
+docker pull odox700/mbmdbe:staging-1.0
+
+
+// Run container locally.
+docker run --name mbmdbe-staging -dtp 9003:80 --env-file my-envs/.env.mbmdbe.staging odox700/mbmdbe:staging-1.0
+
+
+
+// Run Swarm Service
+docker service create --replicas 6 -tp 9003:80 --env-file my-envs/.env.mbmdbe.staging odox700/mbmdbe:staging-1.0
