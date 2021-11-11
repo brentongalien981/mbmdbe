@@ -86,4 +86,21 @@ class MyTestController extends Controller
             ]
         ];
     }
+
+
+
+    public function getSumOfTwoHighestNums() {
+
+        $integers = [];
+
+        $firstHighestNum = $integers[0] ?? 0;
+        $secondHighestNum = $integers[0] ?? 0;
+
+        foreach ($integers as $i) {
+            if ($i >= $firstHighestNum) {
+                $firstHighestNum = $i;
+            }
+        }
+
+    }
 }
