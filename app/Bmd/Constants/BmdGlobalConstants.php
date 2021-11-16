@@ -80,7 +80,7 @@ class BmdGlobalConstants
      */
     public const COMPANY_INFO = [
         'owner_name' => 'Bren Baga',
-        'company' => 'ASB Dev Inc.',
+        // 'company' => 'APBREL Merchandise',
         'email' => self::EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS,
         'street1' => '50 Thorncliffe Park Dr',
         'street2' => 'Unit 105',
