@@ -23,7 +23,7 @@ class EpShipmentRecommender
     {
         $originAddressParams = [
             'verify' => [true],
-            'name' => BmdGlobalConstants::COMPANY_INFO['owner_name'],
+            // 'name' => BmdGlobalConstants::COMPANY_INFO['owner_name'],
             'company' => BmdGlobalConstants::COMPANY_INFO['company'],
             'email' => BmdGlobalConstants::COMPANY_INFO['email'],
             'street1' => BmdGlobalConstants::COMPANY_INFO['street1'],
