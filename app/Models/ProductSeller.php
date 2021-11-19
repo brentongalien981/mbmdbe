@@ -16,7 +16,7 @@ class ProductSeller extends Model
 
 
     public static function syncBmdSellerProductsSizeAvailabilityQuantitiesWithInventory() {
-        $bmdSeller = Seller::where('name', BmdGlobalConstants::BMD_SELLER_NAME)->get()[0];
+        $bmdSeller = Seller::where('name', env('COMPANY_SELLER_NAME'))->get()[0];
 
         $bmdSellerProducts = self::where('seller_id', $bmdSeller->id)->get();
 
@@ -34,7 +34,7 @@ class ProductSeller extends Model
 
 
     public static function resetSizeAvailabilityQuantitiesOfNonBmdSellerProducts() {
-        $bmdSeller = Seller::where('name', BmdGlobalConstants::BMD_SELLER_NAME)->get()[0];
+        $bmdSeller = Seller::where('name', env('COMPANY_SELLER_NAME'))->get()[0];
 
         $allNonBmdSellerProducts = self::whereNotIn('seller_id', [$bmdSeller->id])->get();
 
