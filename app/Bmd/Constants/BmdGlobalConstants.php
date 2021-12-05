@@ -40,12 +40,12 @@ class BmdGlobalConstants
 
     // BMD-TAGS: email, order, queue, order-received
     // BMD-ON-ITER: Development, Staging, Deployment
-    public const EMAIL_SENDER_FOR_ORDER_RECEIVED = 'no-reply@asbdev.com';
-    public const EMAIL_FOR_ORDER_EMAILS_TRACKER = 'bren.baga@asbdev.com'; // Maybe change this to orderemailstracker@bmd.com
-    public const EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS = 'bren.baga@asbdev.com';
+    public const EMAIL_SENDER_FOR_ORDER_RECEIVED = 'noreply@penguinjam.com';
+    public const EMAIL_FOR_ORDER_EMAILS_TRACKER = 'pjtracker23@gmail.com'; // BCC for Order Confirmation Emails
+    public const EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS = 'inventory@penguinjam.com';
     // BMD-ON-ITER: Staging: Set this to the dispatch-manager's email.
-    public const EMAIL_RECIPIENT_FOR_EP_BATCH_UPDATES = 'bren.baga@asbdev.com';
-    public const EMAIL_SENDER_FOR_EP_BATCH_UPDATES = 'epbatchupdates@asbdev.com';
+    public const EMAIL_RECIPIENT_FOR_EP_BATCH_UPDATES = 'inventory@penguinjam.com';
+    public const EMAIL_SENDER_FOR_EP_BATCH_UPDATES = 'epbatchupdates@penguinjam.com';
 
 
 
@@ -62,7 +62,8 @@ class BmdGlobalConstants
     // BMD-ON-STAGING
     public const MBMD_ACCEPTED_EMAIL_DOMAINS = [
         'asbdev.com',
-        'bmd.com'
+        'bmd.com',
+        'penguinjam.com'
     ];
 
 
@@ -79,7 +80,6 @@ class BmdGlobalConstants
      * BMD-ON-ITER: Developemnt, Staging, and Deployment: Change this.
      */
     public const COMPANY_INFO = [
-        // 'owner_name' => 'Bren Baga',
         'company' => 'APBREL Merchandise',
         'email' => self::EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS,
         'street1' => '50 Thorncliffe Park Dr',
