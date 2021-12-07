@@ -52,6 +52,12 @@ return [
         ],
 
         'mysql' => [
+            'read' => [
+                'host' => env('DB_HOST_READ_ONLY')
+            ],
+            'write' => [
+                'host' => env('DB_HOST_WRITE')
+            ],
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
             'host' => env('DB_HOST', '127.0.0.1'),
