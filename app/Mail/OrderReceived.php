@@ -35,7 +35,7 @@ class OrderReceived extends Mailable
         $arrivesInMsg = 'Arrives in ' . $earliestDeliveryDays . '-' . $latestDeliveryDays . ' Business Days';
 
         $this->extraData = [
-            'orderLink' => env('APP_BMDFE_URL') . '/order?id=' . $order->id, // BMD-ON-ITER: TEST-ITER-001: Make sure this links to the frondend.
+            'orderLink' => env('BMDFE_WEBSITE_LINK') . '/order?id=' . $order->id, // BMD-ON-ITER: TEST-ITER-001: Make sure this links to the frondend.
             'total' => $total,
             'arrivesInMsg' => $arrivesInMsg,
             'earliestDeliveryDateInStr' => Order::getReadableDate($order->earliest_delivery_date),
