@@ -34,7 +34,7 @@ class BmdGlobalConstants
     // BMD-ON-STAGING
     // NOTE: Whenever you change this, make sure to edit both frontend and backend constant values.
     public const PAYMENT_TO_FUNDS_PERIOD = 1;
-    public const ORDER_PROCESSING_PERIOD = 1;
+    public const ORDER_PROCESSING_PERIOD = 3;
 
 
 
@@ -96,5 +96,24 @@ class BmdGlobalConstants
     public const EP_EVENT_DESCRIPTIONS = [
         'BATCH_CREATED' => 'batch.created',
         'BATCH_UPDATED' => 'batch.updated'
+    ];
+
+
+
+    public const CANADIAN_HOLIDAYS = [
+        '2021-12-25',
+        '2021-12-26',
+        '2021-12-27',
+        // 2022
+        '2022-1-1',
+        '2022-1-3',
+        '2022-2-21',
+        '2022-4-15',
+        '2022-5-23',
+        '2022-7-1',
+        '2022-9-5',
+        '2022-10-10',
+        '2022-12-25',
+        '2022-12-26',
     ];
 }
