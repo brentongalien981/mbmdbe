@@ -79,15 +79,15 @@ class BmdGlobalConstants
      * BMD-ON-ITER: Developemnt, Staging, and Deployment: Change this.
      */
     public const COMPANY_INFO = [
-        'company' => 'APBREL Merchandise',
+        'company' => 'Penguin Jam',
         'email' => self::EMAIL_FOR_SHIPPING_ORIGIN_ADDRESS,
-        'street1' => '50 Thorncliffe Park Dr',
-        'street2' => 'Unit 105',
+        'street1' => '82 Laird Dr',
+        'street2' => 'Unit 126',
         'city' => 'East York',
         'state' => 'ON',
         'country' => 'CA',
-        'zip' => 'M4H1K4',
-        'phone' => '4164604026'
+        'zip' => 'M4G3V1',
+        'phone' => '6475607078'
     ];
 
 
