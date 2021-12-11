@@ -19,19 +19,19 @@ RUN docker-php-ext-install \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ENV WEB_DOCUMENT_ROOT /app/public
-ENV APP_ENV local
+ENV APP_ENV production
 
 WORKDIR /app
 COPY . .
 
 RUN composer install --no-interaction --optimize-autoloader --no-dev
 
-COPY ./my-shell-scripts/set-prestaging-env.sh .
-RUN chmod 777 set-prestaging-env.sh
+COPY ./my-shell-scripts/set-staging-env.sh .
+RUN chmod 777 set-staging-env.sh
 
 
 RUN php artisan passport:keys
 
 
 WORKDIR /opt/docker/provision/entrypoint.d 
-RUN echo "sh /app/set-prestaging-env.sh" >> 20-nginx.sh
+RUN echo "sh /app/set-staging-env.sh" >> 20-nginx.sh

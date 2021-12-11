@@ -11,11 +11,13 @@ echo "APP_ENV=${APP_ENV}" >> .env
 echo "APP_KEY=${APP_KEY}" >> .env
 echo "APP_DEBUG=${APP_DEBUG}" >> .env
 echo "APP_URL=${APP_URL}" >> .env
-echo "APP_FRONTEND_URL_FOR_DEVELOPMENT=${APP_FRONTEND_URL_FOR_DEVELOPMENT}" >> .env
-echo "APP_FRONTEND_URL_FOR_PRESTAGING=${APP_FRONTEND_URL_FOR_PRESTAGING}" >> .env
-echo "APP_FRONTEND_URL_FOR_STAGING=${APP_FRONTEND_URL_FOR_STAGING}" >> .env
-echo "APP_FRONTEND_URL_FOR_DEPLOYMENT=${APP_FRONTEND_URL_FOR_DEPLOYMENT}" >> .env
-echo "LOG_CHANNEL=${LOG_CHANNEL}" >> .env
+echo "APP_FRONTEND_URL=${APP_FRONTEND_URL}" >> .env
+echo "BMDFE_WEBSITE_LINK=${BMDFE_WEBSITE_LINK}" >> .env
+echo "BMDBE_WEBSITE_LINK=${BMDBE_WEBSITE_LINK}" >> .env
+echo "MBMDFE_WEBSITE_LINK=${MBMDFE_WEBSITE_LINK}" >> .env
+echo "MBMDBE_WEBSITE_LINK=${MBMDBE_WEBSITE_LINK}" >> .env
+echo "COMPANY_SELLER_NAME=${COMPANY_SELLER_NAME}" >> .env
+echo "BUSINESS_NAME=${BUSINESS_NAME}" >> .env
 echo "LOG_LEVEL=${LOG_LEVEL}" >> .env
 echo "DB_CONNECTION=${DB_CONNECTION}" >> .env
 echo "DB_HOST=${DB_HOST}" >> .env
@@ -23,6 +25,8 @@ echo "DB_PORT=${DB_PORT}" >> .env
 echo "DB_DATABASE=${DB_DATABASE}" >> .env
 echo "DB_USERNAME=${DB_USERNAME}" >> .env
 echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+echo "DB_HOST_READ_ONLY=${DB_HOST_READ_ONLY}" >> .env
+echo "DB_HOST_WRITE=${DB_HOST_WRITE}" >> .env
 echo "BROADCAST_DRIVER=${BROADCAST_DRIVER}" >> .env
 echo "CACHE_DRIVER=${CACHE_DRIVER}" >> .env
 echo "FILESYSTEM_DRIVER=${FILESYSTEM_DRIVER}" >> .env
@@ -32,10 +36,6 @@ echo "SESSION_LIFETIME=${SESSION_LIFETIME}" >> .env
 echo "MEMCACHED_HOST=${MEMCACHED_HOST}" >> .env
 echo "REDIS_CLIENT=${REDIS_CLIENT}" >> .env
 echo "REDIS_HOST=${REDIS_HOST}" >> .env
-echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
-echo "REDIS_PORT=${REDIS_PORT}" >> .env
-echo "REDIS_PRIMARY_PROD=${REDIS_PRIMARY_PROD}" >> .env
-echo "REDIS_READER_PROD=${REDIS_READER_PROD}" >> .env
 echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
 echo "REDIS_PORT=${REDIS_PORT}" >> .env
 echo "REDIS_PRIMARY=${REDIS_PRIMARY}" >> .env
@@ -59,6 +59,8 @@ echo "PUSHER_APP_SECRET=${PUSHER_APP_SECRET}" >> .env
 echo "PUSHER_APP_CLUSTER=${PUSHER_APP_CLUSTER}" >> .env
 echo "MIX_PUSHER_APP_KEY=${MIX_PUSHER_APP_KEY}" >> .env
 echo "MIX_PUSHER_APP_CLUSTER=${MIX_PUSHER_APP_CLUSTER}" >> .env
+echo "SES_AWS_ACCESS_KEY_ID=${SES_AWS_ACCESS_KEY_ID}" >> .env
+echo "SES_AWS_SECRET_ACCESS_KEY=${SES_AWS_SECRET_ACCESS_KEY}" >> .env
 echo "SQS_AWS_ACCESS_KEY_ID=${SQS_AWS_ACCESS_KEY_ID}" >> .env
 echo "SQS_AWS_SECRET_ACCESS_KEY=${SQS_AWS_SECRET_ACCESS_KEY}" >> .env
 echo "SQS_PREFIX=${SQS_PREFIX}" >> .env
@@ -71,15 +73,13 @@ echo "QUEUE_FAILED_AWS_BUCKET=${QUEUE_FAILED_AWS_BUCKET}" >> .env
 echo "QUEUE_FAILED_AWS_USE_PATH_STYLE_ENDPOINT=${QUEUE_FAILED_AWS_USE_PATH_STYLE_ENDPOINT}" >> .env
 echo "QUEUE_FAILED_DYNAMODB_TABLE=${QUEUE_FAILED_DYNAMODB_TABLE}" >> .env
 echo "QUEUE_FAILED_DYNAMODB_ENDPOINT=${QUEUE_FAILED_DYNAMODB_ENDPOINT}" >> .env
+echo "STRIPE_PK=${STRIPE_PK}" >> .env
+echo "STRIPE_SK=${STRIPE_SK}" >> .env
 echo "EASYPOST_PK=${EASYPOST_PK}" >> .env
 echo "EASYPOST_TK=${EASYPOST_TK}" >> .env
 echo "PASSPORT_GRANT_PASSWORD_CLIENT_ID=${PASSPORT_GRANT_PASSWORD_CLIENT_ID}" >> .env
 echo "PASSPORT_GRANT_PASSWORD_CLIENT_SECRET=${PASSPORT_GRANT_PASSWORD_CLIENT_SECRET}" >> .env
 echo "WEB_DOCUMENT_ROOT=${WEB_DOCUMENT_ROOT}" >> .env
-
-
-# NOTE: In order for this line to work, the last command "php artisan config:clear" should be uncommented and run.
-echo "MY_RANDOM_CONTAINER_NUMBER=${RANDOM}" >> .env
 
 
 echo "PASSPORT_PRIVATE_KEY=\"" >> .env
@@ -92,23 +92,19 @@ cat /app/storage/oauth-public.key >> .env
 echo "\"" >> .env
 
 
+###
 echo "FILE: .env has been set."
 
 
 echo "Changing file ownerships..."
 chown -R application:application .
 
+
 echo "File ownerships have been set."
 echo "##################### END MY SHIT ####################"
 
 
 
-echo "Caching Laravel stuffs..."
-
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-# php artisan config:clear
-
-
-echo "Laravel stuffs cached!"
