@@ -22,19 +22,21 @@ class UserController extends Controller
     {
 
         // BMD-ON-STAGING: Set stricter validation rules.
-        $acceptedEmailDomainsValidationRule = 'email|min:5|max:64|unique:users';
-        // $acceptedEmailDomainsValidationRule = 'email|min:8|max:64|unique:users';
-        // $acceptedEmailDomainsValidationRule .= '|ends_with:' . implode(',', BmdGlobalConstants::MBMD_ACCEPTED_EMAIL_DOMAINS);
+        // $acceptedEmailDomainsValidationRule = 'email|min:5|max:64|unique:users'; // FOR-DEVELOPMENT
+        $acceptedEmailDomainsValidationRule = 'email|min:8|max:64|unique:users';
+        $acceptedEmailDomainsValidationRule .= '|ends_with:' . implode(',', BmdGlobalConstants::MBMD_ACCEPTED_EMAIL_DOMAINS);
 
-        // $passwordValidationRule = Password::min(8)
-        //     ->letters()
-        //     ->mixedCase()
-        //     ->numbers()
-        //     ->symbols()
-        //     ->uncompromised();
-        $passwordValidationRule = Password::min(4)
+        $passwordValidationRule = Password::min(8)
             ->letters()
-            ->numbers();
+            ->mixedCase()
+            ->numbers()
+            ->symbols()
+            ->uncompromised();
+
+        // FOR-DEVELOPMENT
+        // $passwordValidationRule = Password::min(4)
+        //     ->letters()
+        //     ->numbers();
 
         $v = $r->validate([
             'email' => $acceptedEmailDomainsValidationRule,

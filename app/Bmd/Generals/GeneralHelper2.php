@@ -63,18 +63,6 @@ class GeneralHelper2
 
     public static function getAppFrontendUrl()
     {
-        $appEnv = env('APP_ENV');
-
-        switch ($appEnv) {
-            case 'prestaging':
-                return env('APP_FRONTEND_URL_FOR_PRESTAGING');
-            case 'staging':
-                return env('APP_FRONTEND_URL_FOR_STAGING');
-            case 'production':
-            case 'deployment':
-                return env('APP_FRONTEND_URL_FOR_DEPLOYMENT');
-            default:
-                return env('APP_FRONTEND_URL');
-        }
+        return env('APP_FRONTEND_URL');
     }
 }
