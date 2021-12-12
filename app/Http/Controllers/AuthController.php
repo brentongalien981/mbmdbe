@@ -169,7 +169,7 @@ class AuthController extends Controller
     {
         // throw new Exception('Not Allowed In Production Mode!');
 
-        if (env('APP_ENV') === 'production') {
+        if (env('APP_ENV') === 'production' || env('APP_ENV') === 'staging') {
             throw new Exception('Not Allowed In Production Mode!');
         }
 
