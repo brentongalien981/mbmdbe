@@ -167,8 +167,8 @@ class AuthController extends Controller
     
     public function loginAsDemoUser(Request $r) 
     {
-        throw new Exception('Not Allowed In Production Mode!');
-        
+        // throw new Exception('Not Allowed In Production Mode!');
+
         if (env('APP_ENV') === 'production') {
             throw new Exception('Not Allowed In Production Mode!');
         }
