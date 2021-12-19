@@ -37,7 +37,7 @@ class EmailEpBatchUpdate implements ShouldQueue
     public function handle()
     {
         Mail::to(BmdGlobalConstants::EMAIL_RECIPIENT_FOR_EP_BATCH_UPDATES)
-            ->cc(BmdGlobalConstants::EMAIL_SENDER_FOR_EP_BATCH_UPDATES)
+            ->cc(BmdGlobalConstants::EMAIL_FOR_ORDER_EMAILS_TRACKER)
             ->send(new EpBatchUpdated($this->dispatch));
     }
 }

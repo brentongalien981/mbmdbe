@@ -20,7 +20,7 @@ docker pull odox700/mbmdbe:staging-1.0
 
 
 // Run container locally.
-docker run --name mbmdbe-staging -dtp 9003:80 --env-file my-envs/.env.mbmdbe.staging odox700/mbmdbe:staging-1.0
+docker run --name mbmdbe-staging -dtp 9003:80 --env-file my-envs/mbmdbe.staging.env odox700/mbmdbe:staging-1.0
 
 
 

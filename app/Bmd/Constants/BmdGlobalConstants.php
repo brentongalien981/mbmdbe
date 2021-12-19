@@ -12,7 +12,7 @@ class BmdGlobalConstants
 
     // BMD-ON-STAGING
     // public const WEBSITE = 'https://mbmd.com';
-    public const BMD_SELLER_NAME = 'ASB Inc.';
+    public const BMD_SELLER_NAME = 'Penguin Jam';
 
 
     public const RETRIEVED_DATA_FROM_DB = 1001;
@@ -99,6 +99,7 @@ class BmdGlobalConstants
 
 
 
+    // BMD-ON-ITER: Staging, Deployment, Production. Always update this every year.
     public const CANADIAN_HOLIDAYS = [
         '2021-12-25',
         '2021-12-26',
