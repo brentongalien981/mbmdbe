@@ -126,7 +126,8 @@ class ShippingController extends Controller
 
             // Reference order.
             $entireProcessData['order'] = Order::findOrFail($r->orderId);
-            EpShipmentRecommender::guardForAlreadyExistingShipment($entireProcessData['order']);
+            $o = $entireProcessData['order'];
+            EpShipmentRecommender::guardForAlreadyExistingShipment($o);
 
             // Retrieve EP-shipment.
             $entireProcessData['epShipment'] = Shipment::retrieve($r->probableShippingId);
@@ -137,10 +138,17 @@ class ShippingController extends Controller
             // Buy EP-shipment.
             $entireProcessData['epShipment']->buy(['rate' => $epShipmentRate]);
 
+            
+            // Reread the newly-bought EP-Shipment. Then buy EP-Package-Insurance.
+            $entireProcessData['epShipment'] = Shipment::retrieve($r->probableShippingId);
+            $orderAmountToInsure = $o->charged_subtotal + $o->charged_shipping_fee + $o->charged_tax;
+            $entireProcessData['epShipment']->insure(['amount' => $orderAmountToInsure]);
+
+
             // Update order's status to "SHIPPING_LABEL_BOUGHT", and ep-shipment-id.
-            $entireProcessData['order']->ep_shipment_id = $entireProcessData['epShipment']->id;
-            $entireProcessData['order']->status_code = OrderStatus::getCodeByName('SHIPPING_LABEL_BOUGHT');
-            $entireProcessData['order']->save();
+            $o->ep_shipment_id = $entireProcessData['epShipment']->id;
+            $o->status_code = OrderStatus::getCodeByName('SHIPPING_LABEL_BOUGHT');
+            $o->save();
 
             $isResultOk = true;
             $entireProcessData['resultCode'] = GeneralHttpResponseCodes::OK;
@@ -154,7 +162,7 @@ class ShippingController extends Controller
         return [
             'isResultOk' => $isResultOk,
             'objs' => [
-                'order' => new OrderResource($entireProcessData['order']) ?? [],
+                'order' => new OrderResource($o) ?? [],
                 'epShipment' => GeneralHelper2::pseudoJsonify($entireProcessData['epShipment']),
                 'dispatches' => DispatchResource::collection(Dispatch::getAvailableDispatches()),
                 'resultCode' => GeneralHelper2::pseudoJsonify($entireProcessData['resultCode'])
