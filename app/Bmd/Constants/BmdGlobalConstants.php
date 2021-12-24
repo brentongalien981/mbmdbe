@@ -62,7 +62,8 @@ class BmdGlobalConstants
     // BMD-ON-STAGING
     public const MBMD_ACCEPTED_EMAIL_DOMAINS = [
         'asbdev.com',
-        'penguinjam.com'
+        'penguinjam.com',
+        'penguinjam.ca'
     ];
 
 
